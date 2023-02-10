@@ -59,7 +59,7 @@ figure;
 A2 = propagate(input.E, 100e-2, wavelength, Nx, Ny, nx, ny);
 
 colormap('hot');
-imagesc(abs(A3));
+imagesc(abs(A2));
 title("Result @ 100 cm");
 colorbar;
 
