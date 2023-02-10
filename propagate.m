@@ -11,7 +11,7 @@ function output = propagate(input, distance, wavelength, Nx, Ny, nx, ny)
     posx = linspace(-rangex/2, rangex/2, Nx);
     posy = linspace(-rangey/2, rangey/2, Ny);
     
-    fftc = fftshift(fft2(input));
+    fftc = gpuArray(fftshift(fft2(input)));
     
     [fxx, fyy] = meshgrid(posx, posy);
     

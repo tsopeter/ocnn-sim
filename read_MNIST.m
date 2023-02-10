@@ -20,7 +20,7 @@ function output = read_MNIST(datafile, labelfile)
         vec = images(:,i);
 
         % we want to splice and concat
-        temp = zeros(n_rows, n_cols);
+        temp = zeros(n_rows, n_cols, 'single');
 
         for j=1:1:n_cols
             stx = 1 + n_cols * (j - 1);

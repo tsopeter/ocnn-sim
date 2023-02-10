@@ -8,13 +8,13 @@ classdef v_image
     methods
         function out = normalize(obj)
             if (length(obj.data) <= 0)
-                out = [];
+                out = gpuArray([]);
             else 
                 m = max(max(abs(obj.data)));
                 if (m == 0)
-                    out = obj.data;
+                    out = gpuArray(obj.data);
                 else
-                    out = obj.data / m;
+                    out = gpuArray(obj.data) / m;
                 end
             end
         end

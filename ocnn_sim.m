@@ -18,7 +18,7 @@ wavelength = 1000e-9;
 plate = detector_plate(Nx, Ny, nx, ny, nx/4, nx/20);
 
 % create a empty field
-input = wave_init(Nx, Ny, nx, ny, wavelength, ones(Ny, Nx));
+input = wave_init(Nx, Ny, nx, ny, wavelength, ones(Ny, Nx, 'single'));
 
 % we want to read the MNIST data
 data  = read_MNIST('testing/images', 'testing/labels');
@@ -59,7 +59,7 @@ figure;
 A2 = propagate(input.E, 100e-2, wavelength, Nx, Ny, nx, ny);
 
 colormap('hot');
-imagesc(abs(A3));
+imagesc(abs(A2));
 title("Result @ 100 cm");
 colorbar;
 
