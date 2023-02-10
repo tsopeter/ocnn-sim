@@ -4,33 +4,33 @@
 
 % define the parameters of the network
 
-        Nx = 512;      % number of columns
-        Ny = 512;      % number of rows
-        
-        % this defines the size of the display
-        nx = 20e-3;
-        ny = 20e-3;
-        
-        % interpolation value
-        ix = Nx/2;
-        iy = Ny/2;
-        
-        a0 = 20;
-        
-        wavelength = 1000e-9;    % wavelength
-        
-        epoch = 30;              % we want 30 epochs
-        images_per_epoch = 100; % we want 100 images per training session (epoch)
-        
-        distance_1 = 30e-2;      % propagation distance
-        distance_2 = 30e-2;
-        
-        eta = 6.0;               % learning rate
+Nx = 512;      % number of columns
+Ny = 512;      % number of rows
 
-% create a plate to detect digits
+% this defines the size of the display
+nx = 20e-3;
+ny = 20e-3;
+
+% interpolation value
+ix = Nx/2;
+iy = Ny/2;
+
+a0 = 20;
+
+wavelength = 1000e-9;    % wavelength
+
+epoch = 30;              % we want 30 epochs
+images_per_epoch = 100; % we want 100 images per training session (epoch)
+
+distance_1 = 30e-2;      % propagation distance
+distance_2 = 30e-2;
+
+eta = 6.0;               % learning rate
+
+% create a plate to detect
 plate = detector_plate(Nx, Ny, nx, ny, nx/4, nx/20);
 
-% load the mnist data into a MxM matrix format
+% we want to read the MNIST data
 data  = read_MNIST('testing/images', 'testing/labels');
 
 % get the interpolation value k
@@ -42,21 +42,18 @@ k = min(kx, ky);
 
 % we want to initalize the kernel mask with random phase and amplitude
 kernel = internal_random_amp(Nx, Ny);
-        
-% generate the data to train on 
+
+% generate the data to train on
 batch = v_batchwrapper;
 batch.batch = get_batch(data, images_per_epoch);
-superbatches(epoch) = batch;    %   a superbatch consists of [a, b, c...d]
-                                %   where each are v_batchwrappers
-                                %   each v_batchwrappers contains an 1xM
-                                %   vector of of batches
+superbatches(epoch) = batch;
 for i=1:1:epoch-1
     batch = v_batchwrapper;
     batch.batch = get_batch(data, images_per_epoch);
     superbatches(i) = batch;
 end
 
-                                                                                                                    
+
 % to store data generated per training session
 dhs(images_per_epoch) = data_handler;
 
@@ -102,6 +99,7 @@ for i=1:1:epoch
         % store the results to be used in backpropagation
         dh = data_handler;
         dh.input_img      = nimg;
+        dh.kernel_img     = img_kernel;
         dh.distance_1_img = img_prop_1;
         dh.nonliner_img   = img_non;
         dh.distance_2_img = img_prop_2;
@@ -158,10 +156,13 @@ for i=1:1:epoch
 
     testbatch = superbatches(1).batch;
     for j=1:1:length(testbatch)
-        batch = testbatch(j);
+        b
 
         img   = batch.img;
         label = batch.label;
+
+        soln     = circle_at(Nx, Ny, nx, ny, nx/4, 0, nx/20);
+        soln     = imrotate(soln, 36*label, 'crop');
 
         % normalize and resize the images
         nimg  = mask_resize(interp2(img.normalize(), k), Nx, Ny);
@@ -181,12 +182,6 @@ for i=1:1:epoch
         % pass through detector
         img_det     = img_prop_2 .* plate;
         img_det_mag = abs(img_det).^2;
-
-        result = detector_location(img_det_mag, Nx, Ny, nx, ny, nx/4, nx/20);
-
-        if (result == label)
-            correct_per_epoch = correct_per_epoch + 1;
-        end
         
     end
 
