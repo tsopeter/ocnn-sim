@@ -1,6 +1,7 @@
 function output = read_MNIST(datafile, labelfile)
     output = mnist;
-    [images, labels, n_images, n_labels, n_rows, n_cols] = implt_read_MNIST(datafile, labelfile);
+    [images, labels, n_images, n_labels, n_rows, n_cols] = implt_read_MNIST(datafile, labelfile);   % use C++ implementation for speed
+    %[images, labels, n_images, n_labels, n_rows, n_cols] = implt_read_MNIST_portable(datafile, labelfile);   % use M implementation for portability
 
     % the images are placed as
     % images(1,:) = [a, b, c, ....]
@@ -15,7 +16,7 @@ function output = read_MNIST(datafile, labelfile)
     % we want to convert the image back into 28x28
 
     parsed_images(n_images) = v_image;
-    for i=1:1:length(images)
+    for i=1:1:n_images
         img  = v_image;
         vec = images(:,i);
 
