@@ -4,12 +4,12 @@
 
 % define the parameters of the network
 
-        Nx = 512;      % number of columns
-        Ny = 512;      % number of rows
+        Nx = 1024;      % number of columns
+        Ny = 1024;      % number of rows
         
         % this defines the size of the display
-        nx = 20e-3;
-        ny = 20e-3;
+        nx = 20e-2;
+        ny = 20e-2;
         
         % interpolation value
         ix = Nx/2;
@@ -22,10 +22,10 @@
         epoch = 30;              % we want 30 epochs
         images_per_epoch = 100; % we want 100 images per training session (epoch)
         
-        distance_1 = 30e-2;      % propagation distance
-        distance_2 = 30e-2;
+        distance_1 = 100e-2;      % propagation distance
+        distance_2 = 50e-2;
         
-        eta = 6.0;               % learning rate
+        eta = 50.0;               % learning rate
 
 % create a plate to detect digits
 plate = detector_plate(Nx, Ny, nx, ny, nx/4, nx/20);
@@ -133,9 +133,9 @@ for i=1:1:epoch
         last_zs  = nonlinear_backward(last_zs, a0);
 
         %
-        delta        = delta * last_zs;
-        handle.nabla = delta * handle.input_img';
+        handle.nabla = delta .* last_zs .* handle.input_img;
 
+        nothing = 0;
         dhs(j) = handle;        % restore into handlers
     end
 
@@ -154,7 +154,6 @@ for i=1:1:epoch
     kernel     = new_kernel;
 
     disp("Starting testing...");
-    
 
     testbatch = superbatches(1).batch;
     for j=1:1:length(testbatch)

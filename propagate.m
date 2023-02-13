@@ -5,15 +5,12 @@ function output = propagate(input, distance, wavelength, Nx, Ny, nx, ny)
     rangex = 1/dx;  % number of frequencies available
     rangey = 1/dy;
 
-    stx = rangex/Nx;
-    sty = rangey/Ny;
-    
     posx = linspace(-rangex/2, rangex/2, Nx);
     posy = linspace(-rangey/2, rangey/2, Ny);
     
     fftc = fftshift(fft2(input));
     
-    [fxx, fyy] = meshgrid(posx, posy);
+    [fxx, fyy] = meshgrid(posy, posx);
     
     kz = 2 * pi * sqrt((1/wavelength)^2 -(fxx.^2)-(fyy.^2));
     
