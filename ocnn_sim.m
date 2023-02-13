@@ -132,8 +132,10 @@ for i=1:1:epoch
         last_zs  = handle.distance_1_img;
         last_zs  = nonlinear_backward(last_zs, a0);
 
-        %
-        handle.nabla = delta .* last_zs .* handle.input_img;
+
+        weight = delta * kernel;
+        delta2 = weight .* last_zs;
+        handle.nabla = delta * handle.input_img;
 
         nothing = 0;
         dhs(j) = handle;        % restore into handlers
