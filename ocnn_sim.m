@@ -70,6 +70,9 @@ test_batch.batch = get_batch(test, test.n_images*testing_ratio);
 dhs(images_per_epoch) = data_handler;
 
 % iterate through all training session
+
+itj = 1:1:images_per_epoch;
+
 for i=1:1:epoch
     batches = superbatches(i);
 
@@ -77,8 +80,7 @@ for i=1:1:epoch
     
     %
     % loop to go through each image per training session
-    correct_per_epoch = 0;
-    for j=1:1:images_per_epoch
+    for j=itj
 
         % the bottom below represents the forward pass
         batch = batches.batch(j);
@@ -91,36 +93,18 @@ for i=1:1:epoch
     %
     % start backpropagation for each epoch,
     % after back propagation, update the kernel mask
-    for j=1:1:images_per_epoch
-        handle = dhs(j);        % get the handle of each propagation
-        handle = backward_propagation(handle, plate, distance_1, distance_2, wavelength, Nx, Ny, nx, ny, a0);
-        dhs(j) = handle;        % restore into handlers
-                                % the handle now contains the nabla
+    nabla = zeros(Ny, Nx);
+    for handle=dhs
+        dh = backward_propagation(handle, plate, distance_1, distance_2, wavelength, Nx, Ny, nx, ny, a0);
+        nabla = nabla + dh.nabla;
     end
 
-    %
-    % update the kernel !!!
-
-    new_kernel = zeros(Ny, Nx);
-    for j=1:1:images_per_epoch
-        handle = dhs(j);
-        new_kernel = new_kernel + handle.nabla;
-    end
-
-    new_kernel = new_kernel * (eta/images_per_epoch);
-    new_kernel = kernel - new_kernel;
-    kernel     = new_kernel;
+    nabla  = kernel - (nabla * (eta/images_per_epoch));
+    kernel = nabla;
 
     disp("Starting testing...");
 
-    for j=1:1:test.n_images
-        batch  = test_batch.batch(j);
-        handle = forward_propagation(batch, kernel, plate, distance_1, distance_2, wavelength, Nx, Ny, nx, ny, nx/4, nx/20, k, a0);
-        if (handle.result_label == handle.given_label)
-            correct_per_epoch = correct_per_epoch + 1;
-        end
-        
-    end
+    correct_per_epoch = test_a_batch(test_batch, kernel, plate, distance_1, distance_2, wavelength, Nx, Ny, nx, ny, nx/4, nx/20, k, a0);
 
     disp("@ Epoch="+i+", there was "+100*correct_per_epoch/images_per_epoch+"% correct.");
 end
