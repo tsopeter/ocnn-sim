@@ -4,14 +4,19 @@
 
 clear;
 
+% just as a reminder
+% colormap('hot');
+% imagesc(abs(kernel));
+% colorbar('hot');
+
 % define the parameters of the network
 
         Nx = 1024;      % number of columns
         Ny = 1024;      % number of rows
         
         % this defines the size of the display
-        nx = 20e-3;
-        ny = 20e-3;
+        nx = 6e-2;
+        ny = 6e-2;
         
         % interpolation value
         ix = Nx/2;
@@ -27,7 +32,7 @@ clear;
         distance_1 = 30e-2;      % propagation distance
         distance_2 = 15e-2;
         
-        eta = 0.005;               % learning rate
+        eta = 0.5;               % learning rate
 
         testing_ratio = 0.01;     % 1% of testing data (10k images)
 
@@ -74,6 +79,9 @@ dhs(images_per_epoch) = data_handler;
 itj = 1:1:images_per_epoch;
 
 for i=1:1:epoch
+
+    disp("@Epoch: "+i);
+
     batches = superbatches(i);
 
     disp("Starting training...");
@@ -102,10 +110,10 @@ for i=1:1:epoch
     nabla  = kernel - (nabla * (eta/images_per_epoch));
     kernel = nabla;
 
-    disp("Starting testing...");
+    %disp("Starting testing...");
 
-    correct_per_epoch = test_a_batch(test_batch, kernel, plate, distance_1, distance_2, wavelength, Nx, Ny, nx, ny, nx/4, nx/20, k, a0);
-    disp("@ Epoch="+i+", there was "+(correct_per_epoch/test_n_imgs)*100.0+"% correct.");
+    %correct_per_epoch = test_a_batch(test_batch, kernel, plate, distance_1, distance_2, wavelength, Nx, Ny, nx, ny, nx/4, nx/20, k, a0);
+    %disp("@ Epoch="+i+", there was "+(correct_per_epoch/test_n_imgs)*100.0+"% correct.");
 end
 
 
