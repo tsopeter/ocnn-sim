@@ -6,8 +6,8 @@ clear;
 
 % define the parameters of the network
 
-        Nx = 512;      % number of columns
-        Ny = 512;      % number of rows
+        Nx = 1024;      % number of columns
+        Ny = 1024;      % number of rows
         
         % this defines the size of the display
         nx = 20e-3;
