@@ -2,6 +2,8 @@
 % 
 %
 
+clear;
+
 % define the parameters of the network
 
         Nx = 512;      % number of columns
@@ -139,13 +141,13 @@ for i=1:1:epoch
         %   R1 -> R2 -> R3 -> R4 -> R5
         %   
         
-        d1      = get_propagation_distance(Nx, Ny, nx, ny, distance_1);
-        d2      = get_propagation_distance(Nx, Ny, nx, ny, distance_2);
+        d1      = get_propagation_distance(Nx, Ny, nx, ny, distance_1, wavelength);
+        d2      = get_propagation_distance(Nx, Ny, nx, ny, distance_2, wavelength);
 
         dD      = D - S;
         dD_di4  = m;
         dD_di3  = apply_freq_mask(flip_180(d2), dD_di4);
-        di3_di2 = nonlinear_backward(i2);
+        di3_di2 = nonlinear_backward(i2, a0);
         di3_di1 = apply_freq_mask(flip_180(d1), di3_di2);
         di1_dk  = i1;
 

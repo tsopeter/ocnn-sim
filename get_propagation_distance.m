@@ -1,4 +1,4 @@
-function z = get_propagation_distance(Nx, Ny, nx, ny, distance)
+function z = get_propagation_distance(Nx, Ny, nx, ny, distance, wavelength)
     dx = nx/Nx;     % size of each element
     dy = ny/Ny;
     
