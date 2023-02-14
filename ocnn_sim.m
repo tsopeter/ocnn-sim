@@ -10,8 +10,8 @@ clear;
         Ny = 512;      % number of rows
         
         % this defines the size of the display
-        nx = 20e-2;
-        ny = 20e-2;
+        nx = 20e-3;
+        ny = 20e-3;
         
         % interpolation value
         ix = Nx/2;
@@ -24,10 +24,10 @@ clear;
         epoch = 10;              % we want 30 epochs
         images_per_epoch = 100; % we want 100 images per training session (epoch)
         
-        distance_1 = 100e-2;      % propagation distance
-        distance_2 = 50e-2;
+        distance_1 = 30e-2;      % propagation distance
+        distance_2 = 15e-2;
         
-        eta = 50.0;               % learning rate
+        eta = 3.0;               % learning rate
 
 % create a plate to detect digits
 plate = detector_plate(Nx, Ny, nx, ny, nx/4, nx/20);
@@ -58,6 +58,10 @@ for i=1:1:epoch-1
     batch.batch = get_batch(data, images_per_epoch);
     superbatches(i) = batch;
 end
+
+% create a batch to operate testing on
+test_batch = v_batchwrapper;
+test_batch.batch = get_batch(test, test.n_images);
 
                                                                                                                     
 % to store data generated per training session
@@ -177,12 +181,10 @@ for i=1:1:epoch
 
     disp("Starting testing...");
 
-    testbatch = superbatches(1).batch;
-    for j=1:1:length(testbatch)
-        batch = testbatch(j);
+    for j=1:1:test.n_images
 
-        img   = batch.img;
-        label = batch.label;
+        img   = test_batch.batch(j).img;
+        label = test_batch.batch(j).label;
 
         % normalize and resize the images
         nimg  = mask_resize(interp2(img.normalize(), k), Nx, Ny);
