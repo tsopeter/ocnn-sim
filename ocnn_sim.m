@@ -29,7 +29,7 @@ clear;
         
         eta = 0.05;               % learning rate
 
-        testing_ratio = 0.1;     % 10% of testing data (10k images)
+        testing_ratio = 0.01;     % 1% of testing data (10k images)
 
 % create a plate to detect digits
 plate = detector_plate(Nx, Ny, nx, ny, nx/4, nx/20);
@@ -64,7 +64,7 @@ end
 % create a batch to operate testing on
 test_batch = v_batchwrapper;
 test_batch.batch = get_batch(test, test.n_images*testing_ratio);
-
+test_n_imgs = test.n_images * testing_ratio;
                                                                                                                     
 % to store data generated per training session
 dhs(images_per_epoch) = data_handler;
@@ -105,8 +105,7 @@ for i=1:1:epoch
     disp("Starting testing...");
 
     correct_per_epoch = test_a_batch(test_batch, kernel, plate, distance_1, distance_2, wavelength, Nx, Ny, nx, ny, nx/4, nx/20, k, a0);
-
-    disp("@ Epoch="+i+", there was "+100*correct_per_epoch/images_per_epoch+"% correct.");
+    disp("@ Epoch="+i+", there was "+(correct_per_epoch/test_n_imgs)*100.0+"% correct.");
 end
 
 

@@ -1,4 +1,4 @@
-function output = read_MNIST(datafile, labelfile)
+clearfunction output = read_MNIST(datafile, labelfile)
     output = mnist;
     [images, labels, n_images, n_labels, n_rows, n_cols] = implt_read_MNIST(datafile, labelfile);   % use C++ implementation for speed
     %[images, labels, n_images, n_labels, n_rows, n_cols] = implt_read_MNIST_portable(datafile, labelfile);   % use M implementation for portability

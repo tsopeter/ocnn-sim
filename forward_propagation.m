@@ -23,6 +23,6 @@ function dh = forward_propagation(batch, kernel, plate, distance_1, distance_2, 
    dh.nonlinear_img  = img_non;
    dh.result_img     = img_det;
    dh.given_label    = label;
-   dh.soln_img       =soln;
+   dh.soln_img       = soln;
    dh.result_label   = detector_location(img_det_mag, Nx, Ny, nx, ny, r1, r2);
 end
