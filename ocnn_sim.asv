@@ -4,8 +4,8 @@
 
 % define the parameters of the network
 
-        Nx = 512;      % number of columns
-        Ny = 512;      % number of rows
+        Nx = 1024;      % number of columns
+        Ny = 1024;      % number of rows
         
         % this defines the size of the display
         nx = 20e-2;
@@ -102,9 +102,8 @@ for i=1:1:epoch
         % store the results to be used in backpropagation
         dh = data_handler;
         dh.input_img      = nimg;
-        dh.kernel_img     = img_kernel;
         dh.distance_1_img = img_prop_1;
-        dh.nonlinear_img   = img_non;
+        dh.nonliner_img   = img_non;
         dh.distance_2_img = img_prop_2;
         dh.result_img     = img_det;
         dh.soln_img       = soln;
@@ -122,39 +121,96 @@ for i=1:1:epoch
     for j=1:1:images_per_epoch
         handle = dhs(j);        % get the handle of each propagation
 
-        % data
-        i0 = handle.input_img;
-        i1 = handle.kernel_img;
-        i2 = handle.distance_1_img;
-        i3 = handle.nonlinear_img;
-        i4 = handle.distance_2_img;
-        D  = handle.result_img;
-        S  = handle.soln_img;
-
-        m  = plate;
-
         %
         %   Let the following structure define the chain
-        %   K  -> D1 -> N  -> D2 -> M  -> D
+        %   K  -> D1 -> N  -> D2 -> M  -> R
         %   R1 -> R2 -> R3 -> R4 -> R5
         %   
-        
-        d1      = get_propagation_distance(Nx, Ny, nx, ny, distance_1);
-        d2      = get_propagation_distance(Nx, Ny, nx, ny, distance_2);
+        %   Then to backpropagate to change K,
+        %   let dR = result - expected
+        %   let R = R5 .* m
+        %   and dR/dR5 = m
 
-        dD      = D - S;
-        dD_di4  = m;
-        dD_di3  = apply_freq_mask(flip_180(d2), dD_di4);
-        di3_di2 = nonlinear_backward(i2);
-        di3_di1 = apply_freq_mask(flip_180(d1), di3_di2);
-        di1_dk  = i1;
+        dR     = handle.result_img - handle.soln_img;
+        dR_dR5 = m;
 
-        dD_dk   = dD_di3 .* di3_di1 .* di1_dk;
+        %   
+        %   let dR/dR4 = dR/dR5 * dR5/dR4;
+        %   let R5 = conv(R4, D2) % use apply_freq_mask function instead of
+        %   conv
+        %   thusly, dR5/dR4 = conv(R4, dR/dR5);
 
-        handle.nabla = dD_dk;   %
+        dR5_dR4 = apply_freq_mask(R4, dR_dR5);
+
+        %
+        %   let dR/dR3 = dR/dR5 * dR5/dR4 * dR4/dR3
+        %   let R4 = 
+        %
+        %
+
+
+        % we first take the difference between the solution and the actual
+        % result
+
+        delta = handle.result_img  - handle.soln_img;
+
+        %
+        % we need to compute backpropagation
+        % 
+
+        % firstly, backpropagate delta to distance_2.
+        % since it is a simple element-by-element multiplication,
+        % let df/dz = delta, and r=p*i, where r is the result
+        % p is the plate, and i is the input.
+        % the plate does not change, so we just need to find
+        % dr/di=p, or the partial derivative is just the plate
+
+        dr_di = handle.soln_img;
+
+        % it is a convolution operation, find the input graident
+        % the weights do not change, because the distance does not
+        % change
+        % find convolution between input i and loss gradient L
+        % input is n(i), while loss graident is dr_di;
+        dp2_di = apply_freq_mask (handle.nonlinear_img, dr_di);
+
+        % now, we need to find the derivative of
+        % the nonlinear function,
+        % let r=n(i);
+        % then, dr_di = d_di n (i);
+        % this is the nonlinear_backward function
+        dn_di = nonlinear_backward (handle.distance_1);
+
+        % now, we need to find convolution between,
+        % input and and loss gradient L
+        % input is propagation 1, while loss graident is dn_di
+        dp1_di = apply_freq_mask(handle.distance_1_img, dn_di);
+
+        % find the gradient between input and slm
+        % the
+        dr2_di = kernel;
+
+        % since it is a convolution operation
+        % we need to convolute delta and img_prop_2
+        % since propagation is a convolution operation
+
+        % create the filter and apply it
+        filter = get_propagation_distance (Nx, Ny, nx, ny, distance_2);
+        dn1    = apply_freq_mask(delta, filter);
+
+        % the next is to apply interaction of 
+        % nonlinear activation
+
+
+        weight = delta * kernel;
+        delta2 = weight .* last_zs;
+        handle.nabla = delta * handle.input_img;
+
+        nothing = 0;
         dhs(j) = handle;        % restore into handlers
                                 % the handle now contains the nabla
     end
+
 
     %
     % update the kernel !!!
