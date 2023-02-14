@@ -19,7 +19,7 @@
         
         wavelength = 1000e-9;    % wavelength
         
-        epoch = 30;              % we want 30 epochs
+        epoch = 10;              % we want 30 epochs
         images_per_epoch = 100; % we want 100 images per training session (epoch)
         
         distance_1 = 100e-2;      % propagation distance
@@ -132,6 +132,20 @@ for i=1:1:epoch
         last_zs  = handle.distance_1_img;
         last_zs  = nonlinear_backward(last_zs, a0);
 
+        %
+        % we need to compute backpropagation
+        % 
+        % since it is a convolution operation
+        % we need to convolute delta and img_prop_2
+        % since propagation is a convolution operation
+
+        % create the filter and apply it
+        filter = get_propagation_distance (Nx, Ny, nx, ny, distance_2);
+        dn1    = apply_freq_mask(delta, filter);
+
+        % the next is to apply interaction of 
+        % nonlinear activation
+
 
         weight = delta * kernel;
         delta2 = weight .* last_zs;
@@ -139,6 +153,7 @@ for i=1:1:epoch
 
         nothing = 0;
         dhs(j) = handle;        % restore into handlers
+                                % the handle now contains the nabla
     end
 
 
