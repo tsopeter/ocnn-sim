@@ -82,7 +82,7 @@ for i=1:1:epoch
 
         % the bottom below represents the forward pass
         batch = batches.batch(j);
-        dh    = forward_propagation(batch, kernel, plate, distance_1, distance_2, wavelength, Nx, Ny, nx, ny, nx/4, nx/20, k, a0);
+        dh    = forward_propagation(batch, kernel, plate, distance_1, distance_2, Nx, Ny, nx, ny, nx/4, nx/20);
         dhs(j) = dh;
     end
 
@@ -93,7 +93,7 @@ for i=1:1:epoch
     % after back propagation, update the kernel mask
     for j=1:1:images_per_epoch
         handle = dhs(j);        % get the handle of each propagation
-        handle = backward_propagation(handle, plate, distance_1, distance_2, wavelength, Nx, Ny, nx, ny, a0);
+        handle = backward_propagation(handle, plate, distance_1, distance_2, Nx, Ny, nx, ny, nx/4, nx/20);
         dhs(j) = handle;        % restore into handlers
                                 % the handle now contains the nabla
     end
@@ -115,8 +115,8 @@ for i=1:1:epoch
 
     for j=1:1:test.n_images
         batch  = test_batch.batch(j);
-        handle = forward_propagation(batch, kernel, plate, distance_1, distance_2, wavelength, Nx, Ny, nx, ny, nx/4, nx/20, k, a0);
-        if (handle.result_label == handle.given_label)
+        handle = forward_propagation(batch, kernel, plate, distance_1, distance_2, wavelength, Nx, Ny, nx, ny, )
+        if (result == label)
             correct_per_epoch = correct_per_epoch + 1;
         end
         
