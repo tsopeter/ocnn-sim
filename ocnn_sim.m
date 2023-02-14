@@ -33,7 +33,8 @@ clear;
 plate = detector_plate(Nx, Ny, nx, ny, nx/4, nx/20);
 
 % load the mnist data into a MxM matrix format
-data  = read_MNIST('testing/images', 'testing/labels');
+data  = read_MNIST('training/images', 'training/labels');
+test  = read_MNIST('testing/images', 'testing/labels');
 
 % get the interpolation value k
 kx = log2(double(ix - data.n_cols)/double(data.n_cols - 1))+1;
