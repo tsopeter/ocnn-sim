@@ -29,6 +29,8 @@ clear;
         
         eta = 3.0;               % learning rate
 
+        testing_ratio = 0.1;     % 10% of testing data (10k images)
+
 % create a plate to detect digits
 plate = detector_plate(Nx, Ny, nx, ny, nx/4, nx/20);
 
@@ -61,7 +63,7 @@ end
 
 % create a batch to operate testing on
 test_batch = v_batchwrapper;
-test_batch.batch = get_batch(test, test.n_images);
+test_batch.batch = get_batch(test, test.n_images*testing_ratio);
 
                                                                                                                     
 % to store data generated per training session
