@@ -27,7 +27,7 @@ clear;
         distance_1 = 30e-2;      % propagation distance
         distance_2 = 15e-2;
         
-        eta = 0.05;               % learning rate
+        eta = 0.005;               % learning rate
 
         testing_ratio = 0.01;     % 1% of testing data (10k images)
 
