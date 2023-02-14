@@ -151,6 +151,9 @@ for i=1:1:epoch
         di3_di1 = apply_freq_mask(flip_180(d1), di3_di2);
         di1_dk  = i1;
 
+        % compute backpropagation to change the kernel
+        % all other parameters such as distance_1 and distance_2
+        % are to be fixed.
         dD_dk   = dD .* dD_di3 .* di3_di1 .* di1_dk;
 
         handle.nabla = dD_dk;   %
