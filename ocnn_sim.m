@@ -11,8 +11,8 @@ clear;
 
 % define the parameters of the network
 
-        Nx = 1024;      % number of columns
-        Ny = 1024;      % number of rows
+        Nx = 512;      % number of columns
+        Ny = 512;      % number of rows
         
         % this defines the size of the display
         nx = 6e-2;
@@ -32,7 +32,7 @@ clear;
         distance_1 = 30e-2;      % propagation distance
         distance_2 = 15e-2;
         
-        eta = 0.5;               % learning rate
+        eta = 3.0;               % learning rate
 
         testing_ratio = 0.1;     % 1% of testing data (10k images)
 
@@ -70,9 +70,10 @@ end
 test_batch = v_batchwrapper;
 test_batch.batch = get_batch(test, test.n_images*testing_ratio);
 test_n_imgs = test.n_images * testing_ratio;
-                                                                                                                    
-% to store data generated per training session
-dhs(images_per_epoch) = data_handler;
+
+% clear unused data for reducing memory reqeuirements
+data = [];
+test = [];
 
 % iterate through all training session
 
@@ -88,12 +89,14 @@ for i=1:1:epoch
     
     %
     % loop to go through each image per training session
+    nabla = zeros(Ny, Nx);
     for j=itj
 
         % the bottom below represents the forward pass
-        batch = batches.batch(j);
-        dh    = forward_propagation(batch, kernel, plate, distance_1, distance_2, wavelength, Nx, Ny, nx, ny, nx/4, nx/20, k, a0);
-        dhs(j) = dh;
+        batch  = batches.batch(j);
+        dh     = forward_propagation(batch, kernel, plate, distance_1, distance_2, wavelength, Nx, Ny, nx, ny, nx/4, nx/20, k, a0);
+        dh     = backward_propagation(dh, plate, distance_1, distance_2, wavelength, Nx, Ny, nx, ny, a0);
+        nabla  = nabla + dh.nabla;
     end
 
     disp("Starting updating kernel...");
@@ -101,11 +104,6 @@ for i=1:1:epoch
     %
     % start backpropagation for each epoch,
     % after back propagation, update the kernel mask
-    nabla = zeros(Ny, Nx);
-    for handle=dhs
-        dh = backward_propagation(handle, plate, distance_1, distance_2, wavelength, Nx, Ny, nx, ny, a0);
-        nabla = nabla + dh.nabla;
-    end
 
     nabla  = kernel - (nabla * (eta/images_per_epoch));
     kernel = nabla;
