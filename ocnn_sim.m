@@ -36,6 +36,8 @@ clear;
 
         testing_ratio = 0.1;     % 1% of testing data (10k images)
 
+        M_par_exec = 6;          % Number of cores for parallel execution
+
 % create a plate to detect digits
 plate = detector_plate(Nx, Ny, nx, ny, nx/4, nx/20);
 
@@ -78,7 +80,8 @@ test = [];
 % iterate through all training session
 
 itj = 1:1:images_per_epoch;
-
+dhs(images_per_epoch)= data_handler;
+g_batches = [];
 for i=1:1:epoch
 
     disp("@Epoch: "+i);
@@ -86,14 +89,17 @@ for i=1:1:epoch
     batches = superbatches(i);
 
     disp("Starting training...");
+
+    % get the batches
+    g_batches = batches.batch;
     
     %
     % loop to go through each image per training session
     nabla = zeros(Ny, Nx);
-    for j=itj
+    parfor (j=itj, M_par_exec)
 
         % the bottom below represents the forward pass
-        batch  = batches.batch(j);
+        batch  = g_batches(j);
         dh     = forward_propagation(batch, kernel, plate, distance_1, distance_2, wavelength, Nx, Ny, nx, ny, nx/4, nx/20, k, a0);
         dh     = backward_propagation(dh, plate, distance_1, distance_2, wavelength, Nx, Ny, nx, ny, a0);
         nabla  = nabla + dh.nabla;
@@ -110,8 +116,8 @@ for i=1:1:epoch
 
     disp("Starting testing...");
 
-    correct_per_epoch = test_a_batch(test_batch, kernel, plate, distance_1, distance_2, wavelength, Nx, Ny, nx, ny, nx/4, nx/20, k, a0);
-    disp("@ Epoch="+i+", there was "+(correct_per_epoch/test_n_imgs)*100.0+"% correct.");
+    % correct_per_epoch = test_a_batch(test_batch, kernel, plate, distance_1, distance_2, wavelength, Nx, Ny, nx, ny, nx/4, nx/20, k, a0, M_par_exec);
+    % disp("@ Epoch="+i+", there was "+(correct_per_epoch/test_n_imgs)*100.0+"% correct.");
 end
 
 
