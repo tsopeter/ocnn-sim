@@ -36,7 +36,7 @@ clear;
 
         testing_ratio = 0.1;     % 1% of testing data (10k images)
 
-        M_par_exec = 4;          % Number of cores for parallel execution
+        M_par_exec = 5;          % Number of cores for parallel execution
 
         r1 = nx/6;
         r2 = nx/25;
