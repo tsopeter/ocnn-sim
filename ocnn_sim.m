@@ -32,11 +32,11 @@ clear;
         distance_1 = 30e-2;      % propagation distance
         distance_2 = 15e-2;
         
-        eta = 3.0;               % learning rate
+        eta = 30.0;              % learning rate
 
-        testing_ratio = 0.1;     % 1% of testing data (10k images)
+        testing_ratio = 0.1;     % 10% of testing data (10k images)
 
-        M_par_exec = 4;          % Number of cores for parallel execution
+        M_par_exec = 5;          % Number of cores for parallel execution
 
         r1 = nx/4.5;
         r2 = nx/18;
