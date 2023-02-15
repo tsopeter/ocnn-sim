@@ -38,8 +38,8 @@ clear;
 
         M_par_exec = 5;          % Number of cores for parallel execution
 
-        r1 = nx/4.5;
-        r2 = nx/18;
+        r1 = nx/5.5;
+        r2 = nx/20;
 
 % create a plate to detect digits
 plate = detector_plate(Nx, Ny, nx, ny, r1, r2);
