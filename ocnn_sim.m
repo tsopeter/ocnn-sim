@@ -38,11 +38,11 @@ clear;
 
         M_par_exec = 4;          % Number of cores for parallel execution
 
-        r1 = nx/4;
-        r2 = nx/20;
+        r1 = nx/6;
+        r2 = nx/25;
 
 % create a plate to detect digits
-plate = detector_plate(Nx, Ny, nx, ny, nx/4, nx/20);
+plate = detector_plate(Nx, Ny, nx, ny, r1, r2);
 
 disp("Getting data...");
 
@@ -57,12 +57,13 @@ ky = log2(double(iy - data.n_rows)/double(data.n_rows - 1))+1;
 % get the lowest interpolation value
 k = min(kx, ky);
 
+disp("Generating random kernel...");
 % we want to initalize the kernel mask with random phase and amplitude
 kernel = internal_random_amp(Nx, Ny);
         
 % generate the data to train on 
 batch = v_batchwrapper;
-batch.batch = get_batch(data, images_per_epoch);
+batch.batch = get_batch(data, images_per_epoch, 1);
 superbatches(epoch) = batch;    %   a superbatch consists of [a, b, c...d]
                                 %   where each are v_batchwrappers
                                 %   each v_batchwrappers contains an 1xM
@@ -71,13 +72,14 @@ superbatches(epoch) = batch;    %   a superbatch consists of [a, b, c...d]
 disp("Generating batches...");
 for i=1:1:epoch-1
     batch = v_batchwrapper;
-    batch.batch = get_batch(data, images_per_epoch);
+    batch.batch = get_batch(data, images_per_epoch, 1);
     superbatches(i) = batch;
 end
 
+disp("Generating test bach...");
 % create a batch to operate testing on
 test_batch = v_batchwrapper;
-test_batch.batch = get_batch(test, test.n_images*testing_ratio);
+test_batch.batch = get_batch(test, test.n_images*testing_ratio, 0);
 test_n_imgs = test.n_images * testing_ratio;
 
 % clear unused data for reducing memory reqeuirements
@@ -128,10 +130,9 @@ for i=1:1:epoch
     nabla  = kernel - (nabla * (eta/images_per_epoch));
     kernel = nabla;
 
-    disp("Starting testing...");
-
     % at every 5 epochs, run tests
     if (mod(i, 5) == 0)
+        disp("Starting testing...");
         correct_per_epoch = test_a_batch(test_batch.batch, kernel, plate, distance_1, distance_2, wavelength, Nx, Ny, nx, ny, r1, r2, k, a0, M_par_exec);
         disp("@ Epoch="+i+", there was "+(correct_per_epoch/test_n_imgs)*100.0+"% correct.");
     end
