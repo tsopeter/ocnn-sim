@@ -27,14 +27,14 @@ clear;
         wavelength = 1000e-9;    % wavelength
         
         epoch = 50;              % we want 50 epochs
-        images_per_epoch = 10; % we want 10 images per training session (epoch)
+        images_per_epoch = 500; % we want 500 images per training session (epoch)
         
         distance_1 = 30e-2;      % propagation distance
         distance_2 = 15e-2;
         
         eta = 0.5;               % learning rate
 
-        testing_ratio = 0.01;     % 1% of testing data (10k images)
+        testing_ratio = 0.1;     % 1% of testing data (10k images)
 
 % create a plate to detect digits
 plate = detector_plate(Nx, Ny, nx, ny, nx/4, nx/20);
@@ -110,10 +110,10 @@ for i=1:1:epoch
     nabla  = kernel - (nabla * (eta/images_per_epoch));
     kernel = nabla;
 
-    %disp("Starting testing...");
+    disp("Starting testing...");
 
-    %correct_per_epoch = test_a_batch(test_batch, kernel, plate, distance_1, distance_2, wavelength, Nx, Ny, nx, ny, nx/4, nx/20, k, a0);
-    %disp("@ Epoch="+i+", there was "+(correct_per_epoch/test_n_imgs)*100.0+"% correct.");
+    correct_per_epoch = test_a_batch(test_batch, kernel, plate, distance_1, distance_2, wavelength, Nx, Ny, nx, ny, nx/4, nx/20, k, a0);
+    disp("@ Epoch="+i+", there was "+(correct_per_epoch/test_n_imgs)*100.0+"% correct.");
 end
 
 
