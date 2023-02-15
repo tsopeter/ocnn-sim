@@ -24,22 +24,22 @@ clear;
         
         a0 = 20;
         
-        wavelength = 1000e-9;    % wavelength
+        wavelength = 1000e-9;     % wavelength
         
-        epoch = 50;              % we want 50 epochs
-        images_per_epoch = 1000; % we want 1000 images per training session (epoch)
+        epoch = 100;              % we want 50 epochs
+        images_per_epoch = 4;     % we want 1000 images per training session (epoch)
         
-        distance_1 = 30e-2;      % propagation distance
+        distance_1 = 30e-2;       % propagation distance
         distance_2 = 15e-2;
         
-        eta = 3.0;               % learning rate
+        eta = 0.0005;             % learning rate
 
-        testing_ratio = 0.1;     % 1% of testing data (10k images)
+        testing_ratio = 0.05;     % 0.5% of testing data (10k images)
 
-        test_freq  = 5;          % Number of training sessions before testing
+        test_freq  = 5;           % Number of training sessions before testing
 
-        r1 = nx/4;
-        r2 = nx/20;
+        r1 = nx/6;
+        r2 = nx/25;
 
 % create a plate to detect digits
 plate = detector_plate(Nx, Ny, nx, ny, r1, r2);
@@ -65,21 +65,21 @@ kernel = internal_random_amp(Nx, Ny);
 % generate the data to train on 
 disp("Generating batches...");
 batch = v_batchwrapper;
-batch.batch = get_batch(data, images_per_epoch);
+batch.batch = get_batch(data, images_per_epoch, 1);
 superbatches(epoch) = batch;    %   a superbatch consists of [a, b, c...d]
                                 %   where each are v_batchwrappers
                                 %   each v_batchwrappers contains an 1xM
                                 %   vector of of batches
 for i=1:1:epoch-1
     batch = v_batchwrapper;
-    batch.batch = get_batch(data, images_per_epoch);
+    batch.batch = get_batch(data, images_per_epoch, 1);
     superbatches(i) = batch;
 end
 
 % create a batch to operate testing on
 disp("Generating test batch...");
 test_batch = v_batchwrapper;
-test_batch.batch = get_batch(test, test.n_images*testing_ratio);
+test_batch.batch = get_batch(test, test.n_images*testing_ratio, 0);
 test_n_imgs = test.n_images * testing_ratio;
 
 % clear unused data for reducing memory reqeuirements
