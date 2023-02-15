@@ -19,8 +19,8 @@ clear;
         ny = 6e-2;
         
         % interpolation value
-        ix = Nx/2;
-        iy = Ny/2;
+        ix = Nx/3;
+        iy = Ny/3;
         
         a0 = 20;
         
@@ -36,10 +36,15 @@ clear;
 
         testing_ratio = 0.1;     % 1% of testing data (10k images)
 
-        M_par_exec = 6;          % Number of cores for parallel execution
+        M_par_exec = 4;          % Number of cores for parallel execution
+
+        r1 = nx/4;
+        r2 = nx/20;
 
 % create a plate to detect digits
 plate = detector_plate(Nx, Ny, nx, ny, nx/4, nx/20);
+
+disp("Getting data...");
 
 % load the mnist data into a MxM matrix format
 data  = read_MNIST('training/images', 'training/labels');
@@ -62,6 +67,8 @@ superbatches(epoch) = batch;    %   a superbatch consists of [a, b, c...d]
                                 %   where each are v_batchwrappers
                                 %   each v_batchwrappers contains an 1xM
                                 %   vector of of batches
+
+disp("Generating batches...");
 for i=1:1:epoch-1
     batch = v_batchwrapper;
     batch.batch = get_batch(data, images_per_epoch);
@@ -76,6 +83,13 @@ test_n_imgs = test.n_images * testing_ratio;
 % clear unused data for reducing memory reqeuirements
 data = [];
 test = [];
+
+disp("Running first test...");
+
+% run the test functions
+initial_correct = test_a_batch(test_batch.batch, kernel, plate, distance_1, distance_2, wavelength, Nx, Ny, nx, ny, r1, r2, k, a0, M_par_exec);
+
+disp("Initially Correct: "+(initial_correct/test_n_imgs)*100);
 
 % iterate through all training session
 
@@ -100,7 +114,7 @@ for i=1:1:epoch
 
         % the bottom below represents the forward pass
         batch  = g_batches(j);
-        dh     = forward_propagation(batch, kernel, plate, distance_1, distance_2, wavelength, Nx, Ny, nx, ny, nx/4, nx/20, k, a0);
+        dh     = forward_propagation(batch, kernel, plate, distance_1, distance_2, wavelength, Nx, Ny, nx, ny, r1, r2, k, a0);
         dh     = backward_propagation(dh, plate, distance_1, distance_2, wavelength, Nx, Ny, nx, ny, a0);
         nabla  = nabla + dh.nabla;
     end
@@ -116,8 +130,11 @@ for i=1:1:epoch
 
     disp("Starting testing...");
 
-    % correct_per_epoch = test_a_batch(test_batch, kernel, plate, distance_1, distance_2, wavelength, Nx, Ny, nx, ny, nx/4, nx/20, k, a0, M_par_exec);
-    % disp("@ Epoch="+i+", there was "+(correct_per_epoch/test_n_imgs)*100.0+"% correct.");
+    % at every 5 epochs, run tests
+    if (mod(i, 5) == 0)
+        correct_per_epoch = test_a_batch(test_batch.batch, kernel, plate, distance_1, distance_2, wavelength, Nx, Ny, nx, ny, r1, r2, k, a0, M_par_exec);
+        disp("@ Epoch="+i+", there was "+(correct_per_epoch/test_n_imgs)*100.0+"% correct.");
+    end
 end
 
 
