@@ -36,12 +36,18 @@ clear;
 
         testing_ratio = 0.1;     % 1% of testing data (10k images)
 
-        M_par_exec = 6;          % Number of cores for parallel execution
+        test_freq  = 5;          % Number of training sessions before testing
+
+        r1 = nx/4;
+        r2 = nx/20;
 
 % create a plate to detect digits
-plate = detector_plate(Nx, Ny, nx, ny, nx/4, nx/20);
+plate = detector_plate(Nx, Ny, nx, ny, r1, r2);
 
 % load the mnist data into a MxM matrix format
+
+disp("Getting data...");
+
 data  = read_MNIST('training/images', 'training/labels');
 test  = read_MNIST('testing/images', 'testing/labels');
 
@@ -53,9 +59,11 @@ ky = log2(double(iy - data.n_rows)/double(data.n_rows - 1))+1;
 k = min(kx, ky);
 
 % we want to initalize the kernel mask with random phase and amplitude
+disp("Generating random kernel...");
 kernel = internal_random_amp(Nx, Ny);
         
 % generate the data to train on 
+disp("Generating batches...");
 batch = v_batchwrapper;
 batch.batch = get_batch(data, images_per_epoch);
 superbatches(epoch) = batch;    %   a superbatch consists of [a, b, c...d]
@@ -69,6 +77,7 @@ for i=1:1:epoch-1
 end
 
 % create a batch to operate testing on
+disp("Generating test batch...");
 test_batch = v_batchwrapper;
 test_batch.batch = get_batch(test, test.n_images*testing_ratio);
 test_n_imgs = test.n_images * testing_ratio;
@@ -77,10 +86,15 @@ test_n_imgs = test.n_images * testing_ratio;
 data = [];
 test = [];
 
+% first training session
+disp("First testing session...");
+initial_correct = test_a_batch(test_batch, kernel, plate, distance_1, distance_2, wavelength, Nx, Ny, nx, ny, r1, r2, k, a0);
+
+disp("Initially: "+(initial_correct/test_n_imgs)*100.0+"%");
+
 % iterate through all training session
 
 itj = 1:1:images_per_epoch;
-dhs(images_per_epoch)= data_handler;
 g_batches = [];
 for i=1:1:epoch
 
@@ -89,18 +103,15 @@ for i=1:1:epoch
     batches = superbatches(i);
 
     disp("Starting training...");
-
-    % get the batches
-    g_batches = batches.batch;
     
     %
     % loop to go through each image per training session
     nabla = zeros(Ny, Nx);
-    parfor (j=itj, M_par_exec)
+    for j=itj
 
         % the bottom below represents the forward pass
-        batch  = g_batches(j);
-        dh     = forward_propagation(batch, kernel, plate, distance_1, distance_2, wavelength, Nx, Ny, nx, ny, nx/4, nx/20, k, a0);
+        batch  = batches.batch(j);
+        dh     = forward_propagation(batch, kernel, plate, distance_1, distance_2, wavelength, Nx, Ny, nx, ny, r1, r2, k, a0);
         dh     = backward_propagation(dh, plate, distance_1, distance_2, wavelength, Nx, Ny, nx, ny, a0);
         nabla  = nabla + dh.nabla;
     end
@@ -114,10 +125,11 @@ for i=1:1:epoch
     nabla  = kernel - (nabla * (eta/images_per_epoch));
     kernel = nabla;
 
-    disp("Starting testing...");
-
-    % correct_per_epoch = test_a_batch(test_batch, kernel, plate, distance_1, distance_2, wavelength, Nx, Ny, nx, ny, nx/4, nx/20, k, a0, M_par_exec);
-    % disp("@ Epoch="+i+", there was "+(correct_per_epoch/test_n_imgs)*100.0+"% correct.");
+    if (mod(i, test_freq) == 0)
+        disp("Starting testing...");
+        correct_per_epoch = test_a_batch(test_batch, kernel, plate, distance_1, distance_2, wavelength, Nx, Ny, nx, ny, r1, r2, k, a0);
+        disp("@ Epoch="+i+", there was "+(correct_per_epoch/test_n_imgs)*100.0+"% correct.");
+    end
 end
 
 
