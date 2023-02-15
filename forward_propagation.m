@@ -19,4 +19,5 @@ function dh = forward_propagation(batch, kernel, plate, distance_1, distance_2, 
    dh.distance_1_img = img_prop_1;
    dh.result_img     = img_det;
    dh.soln_img       = soln;
+   dh.given_label    = label;
 end
