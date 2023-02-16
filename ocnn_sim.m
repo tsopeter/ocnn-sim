@@ -36,8 +36,8 @@
 
         M_par_exec = 5;          % Number of cores for parallel execution
 
-        r1 = nx/5.5;
-        r2 = nx/20;
+        r1 = nx/8;
+        r2 = nx/27;
 
 % create a plate to detect digits
 plate = detector_plate(Nx, Ny, nx, ny, r1, r2);
@@ -57,7 +57,9 @@ k = min(kx, ky);
 
 disp("Generating random kernel...");
 % we want to initalize the kernel mask with random phase and amplitude
-% kernel = internal_random_amp(Nx, Ny);
+% if the kernel exists, uncomment the following
+% kernel = load('data/kernel.mat').kernel;
+kernel = internal_random_amp(Nx, Ny);
         
 % generate the data to train on 
 batch = v_batchwrapper;

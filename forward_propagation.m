@@ -6,7 +6,7 @@ function dh = forward_propagation(batch, kernel, plate, distance_1, distance_2, 
    soln  = imrotate(soln, 36*label, 'crop');
 
 
-   nimg  = mask_resize(interp2(img.normalize(), k), Nx, Ny);
+   nimg  = get_normalized_image(img, Nx, Ny, k);
    img_kernel = nimg .* kernel;
    img_prop_1 = propagate(img_kernel, distance_1, wavelength, Nx, Ny, nx, ny);
    img_non    = nonlinear_forward(img_prop_1, a0);
