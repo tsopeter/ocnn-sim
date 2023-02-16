@@ -2,8 +2,6 @@
 % 
 %
 
-clear;
-
 % just as a reminder
 % colormap('hot');
 % imagesc(abs(kernel));
@@ -59,7 +57,7 @@ k = min(kx, ky);
 
 disp("Generating random kernel...");
 % we want to initalize the kernel mask with random phase and amplitude
-kernel = internal_random_amp(Nx, Ny);
+% kernel = internal_random_amp(Nx, Ny);
         
 % generate the data to train on 
 batch = v_batchwrapper;
