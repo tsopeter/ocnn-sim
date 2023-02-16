@@ -24,13 +24,13 @@
         
         wavelength = 1000e-9;    % wavelength
         
-        epoch = 50;              % we want 50 epochs
-        images_per_epoch = 1000; % we want 1000 images per training session (epoch)
+        epoch = 100;              % we want 100 epochs
+        images_per_epoch = 500; % we want 500 images per training session (epoch)
         
         distance_1 = 30e-2;      % propagation distance
         distance_2 = 15e-2;
         
-        eta = 30.0;              % learning rate
+        eta = 24.0;              % learning rate
 
         testing_ratio = 0.1;     % 10% of testing data (10k images)
 
