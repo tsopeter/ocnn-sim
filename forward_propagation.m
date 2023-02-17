@@ -1,16 +1,14 @@
-function dh = forward_propagation(batch, kernel, plate, distance_1, distance_2, wavelength, Nx, Ny, nx, ny, r1, r2, k, a0)
+function dh = forward_propagation(batch, plate, kernel, d1, d2, Nx, Ny, nx, ny, r1, r2, k, a0)
    img   = batch.img;
    label = batch.label;
 
-   soln  = circle_at(Nx, Ny, nx, ny,r1, 0, r2);
-   soln  = imrotate(soln, 36*label, 'crop');
-
+   soln  = imrotate(circle_at(Nx, Ny, nx, ny,r1, 0, r2), 36*label, 'crop');
 
    nimg  = get_normalized_image(img, Nx, Ny, k);
    img_kernel = nimg .* kernel;
-   img_prop_1 = propagate(img_kernel, distance_1, wavelength, Nx, Ny, nx, ny);
+   img_prop_1 = apply_freq_mask(img_kernel, d1);
    img_non    = nonlinear_forward(img_prop_1, a0);
-   img_prop_2 = propagate(img_non, distance_2, wavelength, Nx, Ny, nx, ny);
+   img_prop_2 = apply_freq_mask(img_non, d2);
 
    img_det     = img_prop_2 .* plate;
 

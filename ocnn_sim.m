@@ -9,8 +9,8 @@
 
 % define the parameters of the network
 
-        Nx = 512;      % number of columns
-        Ny = 512;      % number of rows
+        Nx = 256;      % number of columns
+        Ny = 256;      % number of rows
         
         % this defines the size of the display
         nx = 6e-2;
@@ -30,7 +30,7 @@
         distance_1 = 30e-2;      % propagation distance
         distance_2 = 15e-2;
         
-        eta = 24.0;              % learning rate
+        eta = 12.0;              % learning rate
 
         testing_ratio = 0.1;     % 10% of testing data (10k images)
 
@@ -86,10 +86,13 @@ test_n_imgs = test.n_images * testing_ratio;
 data = [];
 test = [];
 
+d1   = get_propagation_distance(Nx, Ny, nx, ny, distance_1 ,wavelength);
+d2   = get_propagation_distance(Nx, Ny, nx, ny, distance_2, wavelength);
+
 disp("Running first test...");
 
 % run the test functions
-initial_correct = test_a_batch(test_batch.batch, kernel, plate, distance_1, distance_2, wavelength, Nx, Ny, nx, ny, r1, r2, k, a0, M_par_exec);
+initial_correct = test_a_batch(test_batch.batch, plate, kernel, d1, d2, Nx, Ny, nx, ny, r1, r2, k, a0, M_par_exec);
 
 disp("Initially Correct: "+(initial_correct/test_n_imgs)*100);
 
@@ -99,7 +102,6 @@ itj = 1:1:images_per_epoch;
 dhs(images_per_epoch)= data_handler;
 g_batches = [];
 for i=1:1:epoch
-
     disp("@Epoch: "+i);
 
     batches = superbatches(i);
@@ -116,8 +118,8 @@ for i=1:1:epoch
 
         % the bottom below represents the forward pass
         batch  = g_batches(j);
-        dh     = forward_propagation(batch, kernel, plate, distance_1, distance_2, wavelength, Nx, Ny, nx, ny, r1, r2, k, a0);
-        dh     = backward_propagation(dh, plate, distance_1, distance_2, wavelength, Nx, Ny, nx, ny, a0);
+        dh     = forward_propagation(batch, plate, kernel, d1, d2, Nx, Ny, nx, ny, r1, r2, k, a0);
+        dh     = backward_propagation(dh, d1, d2, a0);
         nabla  = nabla + dh.nabla;
     end
 
@@ -133,7 +135,7 @@ for i=1:1:epoch
     % at every 5 epochs, run tests
     if (mod(i, 5) == 0)
         disp("Starting testing...");
-        correct_per_epoch = test_a_batch(test_batch.batch, kernel, plate, distance_1, distance_2, wavelength, Nx, Ny, nx, ny, r1, r2, k, a0, M_par_exec);
+        correct_per_epoch = test_a_batch(test_batch.batch, plate, kernel, d1, d2, Nx, Ny, nx, ny, r1, r2, k, a0, M_par_exec);
         disp("@ Epoch="+i+", there was "+(correct_per_epoch/test_n_imgs)*100.0+"% correct.");
     end
 end
