@@ -9,8 +9,8 @@
 
 % define the parameters of the network
 
-        Nx = 512;      % number of columns
-        Ny = 512;      % number of rows
+        Nx = 256;      % number of columns
+        Ny = 256;      % number of rows
         
         % this defines the size of the display
         nx = 6e-2;
@@ -24,13 +24,13 @@
         
         wavelength = 1000e-9;    % wavelength
         
-        epoch = 50;              % we want 50 epochs
-        images_per_epoch = 1000; % we want 1000 images per training session (epoch)
+        epoch = 25;              % we want 25 epochs
+        images_per_epoch = 250; % we want 250 images per training session (epoch)
         
         distance_1 = 30e-2;      % propagation distance
         distance_2 = 15e-2;
         
-        eta = 30.0;              % learning rate
+        eta = 10.0;              % learning rate
 
         testing_ratio = 0.1;     % 10% of testing data (10k images)
 
