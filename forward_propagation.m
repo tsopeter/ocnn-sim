@@ -1,4 +1,4 @@
-function dh = forward_propagation(batch, kernel, d1, d2, Nx, Ny, nx, ny, r1, r2, k, a0)
+function dh = forward_propagation(batch, plate, kernel, d1, d2, Nx, Ny, nx, ny, r1, r2, k, a0)
    img   = batch.img;
    label = batch.label;
 
@@ -10,13 +10,13 @@ function dh = forward_propagation(batch, kernel, d1, d2, Nx, Ny, nx, ny, r1, r2,
    img_non    = nonlinear_forward(img_prop_1, a0);
    img_prop_2 = apply_freq_mask(img_non, d2);
 
-   %img_det     = img_prop_2 .* plate;
+   img_det     = img_prop_2 .* plate;
 
    dh = data_handler;
    dh.input_img  = nimg;
    dh.distance_1_img = img_prop_1;
    dh.distance_2_img = img_prop_2;
-   %dh.result_img     = img_det;
+   dh.result_img     = img_det;
    dh.soln_img       = soln;
    dh.given_label    = label;
 end

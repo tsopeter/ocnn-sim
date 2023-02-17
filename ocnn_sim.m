@@ -24,13 +24,13 @@
         
         wavelength = 1000e-9;    % wavelength
         
-        epoch = 25;              % we want 25 epochs
-        images_per_epoch = 250; % we want 250 images per training session (epoch)
+        epoch = 100;             % we want 100 epochs
+        images_per_epoch = 300;  % we want 300 images per training session (epoch)
         
         distance_1 = 30e-2;      % propagation distance
         distance_2 = 15e-2;
         
-        eta = 10.0;              % learning rate
+        eta = 12.0;              % learning rate
 
         testing_ratio = 0.1;     % 10% of testing data (10k images)
 
@@ -92,7 +92,7 @@ d2   = get_propagation_distance(Nx, Ny, nx, ny, distance_2, wavelength);
 disp("Running first test...");
 
 % run the test functions
-initial_correct = test_a_batch(test_batch.batch, kernel, d1, d2, Nx, Ny, nx, ny, r1, r2, k, a0, M_par_exec);
+initial_correct = test_a_batch(test_batch.batch, plate, kernel, d1, d2, Nx, Ny, nx, ny, r1, r2, k, a0, M_par_exec);
 
 disp("Initially Correct: "+(initial_correct/test_n_imgs)*100);
 
@@ -118,7 +118,7 @@ for i=1:1:epoch
 
         % the bottom below represents the forward pass
         batch  = g_batches(j);
-        dh     = forward_propagation(batch, kernel, d1, d2, Nx, Ny, nx, ny, r1, r2, k, a0);
+        dh     = forward_propagation(batch, plate, kernel, d1, d2, Nx, Ny, nx, ny, r1, r2, k, a0);
         dh     = backward_propagation(dh, d1, d2, a0);
         nabla  = nabla + dh.nabla;
     end
@@ -135,7 +135,7 @@ for i=1:1:epoch
     % at every 5 epochs, run tests
     if (mod(i, 5) == 0)
         disp("Starting testing...");
-        correct_per_epoch = test_a_batch(test_batch.batch, kernel, d1, d2, Nx, Ny, nx, ny, r1, r2, k, a0, M_par_exec);
+        correct_per_epoch = test_a_batch(test_batch.batch, plate, kernel, d1, d2, Nx, Ny, nx, ny, r1, r2, k, a0, M_par_exec);
         disp("@ Epoch="+i+", there was "+(correct_per_epoch/test_n_imgs)*100.0+"% correct.");
     end
 end
