@@ -17,30 +17,29 @@
         ny = 6e-2;
         
         % interpolation value
-        ix = Nx/3;
-        iy = Ny/3;
+        ix = floor(Nx/2);
+        iy = floor(Ny/2);
         
-        a0 = 20;
+        a0 = 30;
         
         wavelength = 1000e-9;    % wavelength
         
-        epoch = 100;              % we want 100 epochs
-        images_per_epoch = 500; % we want 500 images per training session (epoch)
+        epoch = 120;              % we want 120 epochs
+        images_per_epoch = 100; % we want 100 images per training session (epoch)
         
-        distance_1 = 30e-2;      % propagation distance
+        distance_1 = 15e-2;      % propagation distance
         distance_2 = 15e-2;
         
-        eta = 12.0;              % learning rate
+        eta = 0.1;              % learning rate
 
-        testing_ratio = 0.1;     % 10% of testing data (10k images)
+        testing_ratio = 0.01;     % 10% of testing data (10k images)
 
-        M_par_exec = 4;          % Number of cores for parallel execution
+        M_par_exec = 14;          % Number of cores for parallel execution
 
-        r1 = nx/8;
-        r2 = nx/27;
+        n_bars = 9.25;
 
 % create a plate to detect digits
-plate = detector_plate(Nx, Ny, nx, ny, r1, r2);
+plate = mask_resize(new_detector_plate(round(ix/2), round(iy/2), n_bars), Nx, Ny);
 
 disp("Getting data...");
 
@@ -59,22 +58,7 @@ disp("Generating random kernel...");
 % we want to initalize the kernel mask with random phase and amplitude
 % if the kernel exists, uncomment the following
 % kernel = load('data/kernel.mat').kernel;
-kernel = internal_random_amp(Nx, Ny);
-        
-% generate the data to train on 
-batch = v_batchwrapper;
-batch.batch = get_batch(data, images_per_epoch, 1);
-superbatches(epoch) = batch;    %   a superbatch consists of [a, b, c...d]
-                                %   where each are v_batchwrappers
-                                %   each v_batchwrappers contains an 1xM
-                                %   vector of of batches
-
-disp("Generating batches...");
-for i=1:1:epoch-1
-    batch = v_batchwrapper;
-    batch.batch = get_batch(data, images_per_epoch, 1);
-    superbatches(i) = batch;
-end
+kernel = mask_resize(internal_random_amp(ix, iy), Nx, Ny);
 
 disp("Generating test bach...");
 % create a batch to operate testing on
@@ -82,34 +66,27 @@ test_batch = v_batchwrapper;
 test_batch.batch = get_batch(test, test.n_images*testing_ratio, 0);
 test_n_imgs = test.n_images * testing_ratio;
 
-% clear unused data for reducing memory reqeuirements
-data = [];
-test = [];
-
 d1   = get_propagation_distance(Nx, Ny, nx, ny, distance_1 ,wavelength);
 d2   = get_propagation_distance(Nx, Ny, nx, ny, distance_2, wavelength);
 
 disp("Running first test...");
 
 % run the test functions
-initial_correct = test_a_batch(test_batch.batch, plate, kernel, d1, d2, Nx, Ny, nx, ny, r1, r2, k, a0, M_par_exec);
+initial_correct = testing(test_batch.batch, plate, kernel, d1, d2, Nx, Ny, k, a0, n_bars, ix, iy, M_par_exec);
 
-disp("Initially Correct: "+(initial_correct/test_n_imgs)*100);
+disp("Initially Correct: "+initial_correct+" out of "+test_n_imgs);
 
 % iterate through all training session
 
 itj = 1:1:images_per_epoch;
 dhs(images_per_epoch)= data_handler;
-g_batches = [];
 for i=1:1:epoch
     disp("@Epoch: "+i);
 
-    batches = superbatches(i);
-
     disp("Starting training...");
 
-    % get the batches
-    g_batches = batches.batch;
+    % generate a batch
+    batches = get_batch(data, images_per_epoch, 1);
     
     %
     % loop to go through each image per training session
@@ -117,8 +94,8 @@ for i=1:1:epoch
     parfor (j=itj, M_par_exec)
 
         % the bottom below represents the forward pass
-        batch  = g_batches(j);
-        dh     = forward_propagation(batch, plate, kernel, d1, d2, Nx, Ny, nx, ny, r1, r2, k, a0);
+        batch  = batches(j);
+        dh     = forward_propagation(batch, plate, kernel, d1, d2, Nx, Ny, k, a0, n_bars);
         dh     = backward_propagation(dh, d1, d2, a0);
         nabla  = nabla + dh.nabla;
     end
@@ -129,14 +106,14 @@ for i=1:1:epoch
     % start backpropagation for each epoch,
     % after back propagation, update the kernel mask
 
-    nabla  = kernel - (nabla * (eta/images_per_epoch));
-    kernel = nabla;
+    nabla  = (eta/images_per_epoch) * angle(nabla);
+    kernel = kernel .* exp(1i * nabla);
 
     % at every 5 epochs, run tests
     if (mod(i, 5) == 0)
         disp("Starting testing...");
-        correct_per_epoch = test_a_batch(test_batch.batch, plate, kernel, d1, d2, Nx, Ny, nx, ny, r1, r2, k, a0, M_par_exec);
-        disp("@ Epoch="+i+", there was "+(correct_per_epoch/test_n_imgs)*100.0+"% correct.");
+        correct_per_epoch = testing(test_batch.batch, plate, kernel, d1, d2, Nx, Ny, k, a0, n_bars, ix, iy, M_par_exec);
+        disp("@ Epoch="+i+", there was "+correct_per_epoch+" out of "+test_n_imgs);
     end
 end
 

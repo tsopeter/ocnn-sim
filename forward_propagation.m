@@ -1,8 +1,8 @@
-function dh = forward_propagation(batch, plate, kernel, d1, d2, Nx, Ny, nx, ny, r1, r2, k, a0)
+function dh = forward_propagation(batch, plate, kernel, d1, d2, Nx, Ny, k, a0, n_bars)
    img   = batch.img;
    label = batch.label;
 
-   soln  = imrotate(circle_at(Nx, Ny, nx, ny,r1, 0, r2), 36*label, 'crop');
+   soln  = detector_bars(Nx, Ny, label, n_bars);
 
    nimg  = get_normalized_image(img, Nx, Ny, k);
    img_kernel = nimg .* kernel;
