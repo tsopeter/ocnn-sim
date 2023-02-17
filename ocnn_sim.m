@@ -34,7 +34,7 @@
 
         testing_ratio = 0.1;     % 10% of testing data (10k images)
 
-        M_par_exec = 4;          % Number of cores for parallel execution
+        M_par_exec = 8;          % Number of cores for parallel execution
 
         r1 = nx/8;
         r2 = nx/27;
@@ -129,8 +129,8 @@ for i=1:1:epoch
     % start backpropagation for each epoch,
     % after back propagation, update the kernel mask
 
-    nabla  = kernel - (nabla * (eta/images_per_epoch));
-    kernel = nabla;
+    nabla  = angle(nabla) * (eta/images_per_epoch);
+    kernel = exp(1i * nabla);
 
     % at every 5 epochs, run tests
     if (mod(i, 5) == 0)
