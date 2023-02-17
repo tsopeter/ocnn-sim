@@ -9,8 +9,8 @@
 
 % define the parameters of the network
 
-        Nx = 512;      % number of columns
-        Ny = 512;      % number of rows
+        Nx = 256;      % number of columns
+        Ny = 256;      % number of rows
         
         % this defines the size of the display
         nx = 6e-2;
@@ -30,14 +30,14 @@
         distance_1 = 30e-2;      % propagation distance
         distance_2 = 15e-2;
         
-        eta = 24.0;              % learning rate
+        eta = 10.0;              % learning rate
 
         testing_ratio = 0.1;     % 10% of testing data (10k images)
 
-        M_par_exec = 4;          % Number of cores for parallel execution
+        M_par_exec = 8;          % Number of cores for parallel execution
 
         r1 = nx/8;
-        r2 = nx/27;
+        r2 = nx/29;
 
 % create a plate to detect digits
 plate = detector_plate(Nx, Ny, nx, ny, r1, r2);
@@ -51,7 +51,6 @@ test  = read_MNIST('testing/images', 'testing/labels');
 % get the interpolation value k
 kx = log2(double(ix - data.n_cols)/double(data.n_cols - 1))+1;
 ky = log2(double(iy - data.n_rows)/double(data.n_rows - 1))+1;
-
 % get the lowest interpolation value
 k = min(kx, ky);
 
@@ -76,11 +75,24 @@ for i=1:1:epoch-1
     superbatches(i) = batch;
 end
 
+% normalizing data
+disp("Normalizing data...");
+for i=1:1:epoch
+    for j=1:length(superbatches(i).batch)
+        superbatches(i).batch(j).img = get_normalized_image(superbatches(i).batch(j).img, Nx, Ny, k);
+    end
+end
+
 disp("Generating test bach...");
 % create a batch to operate testing on
 test_batch = v_batchwrapper;
 test_batch.batch = get_batch(test, test.n_images*testing_ratio, 0);
 test_n_imgs = test.n_images * testing_ratio;
+
+disp("Normalizing test data");
+for i=1:1:test_n_imgs
+    test_batch.batch(i).img = get_normalized_image(test_batch.batch(i).img, Nx, Ny, k);
+end
 
 % clear unused data for reducing memory reqeuirements
 data = [];
