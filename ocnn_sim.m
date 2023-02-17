@@ -24,8 +24,8 @@
         
         wavelength = 1000e-9;    % wavelength
         
-        epoch = 100;             % we want 100 epochs
-        images_per_epoch = 300;  % we want 300 images per training session (epoch)
+        epoch = 100;              % we want 100 epochs
+        images_per_epoch = 500; % we want 500 images per training session (epoch)
         
         distance_1 = 30e-2;      % propagation distance
         distance_2 = 15e-2;
