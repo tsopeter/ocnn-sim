@@ -9,16 +9,16 @@
 
 % define the parameters of the network
 
-        Nx = 256;      % number of columns
-        Ny = 256;      % number of rows
+        Nx = 1024;      % number of columns
+        Ny = 1024;      % number of rows
         
         % this defines the size of the display
         nx = 6e-2;
         ny = 6e-2;
         
         % interpolation value
-        ix = Nx/3;
-        iy = Ny/3;
+        ix = Nx/2;
+        iy = Ny/2;
         
         a0 = 20;
         
@@ -37,8 +37,7 @@
         M_par_exec = 8;          % Number of cores for parallel execution
 
         r1 = nx/8;
-        r2 = nx/27;
-
+        r2 = nx/28;
 % create a plate to detect digits
 plate = detector_plate(Nx, Ny, nx, ny, r1, r2);
 
@@ -59,7 +58,7 @@ disp("Generating random kernel...");
 % we want to initalize the kernel mask with random phase and amplitude
 % if the kernel exists, uncomment the following
 % kernel = load('data/kernel.mat').kernel;
-kernel = internal_random_amp(Nx, Ny);
+kernel = mask_resize(internal_random_amp(round(ix), round(iy)), Nx, Ny);
         
 % generate the data to train on 
 batch = v_batchwrapper;
