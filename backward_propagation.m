@@ -1,8 +1,8 @@
-function zh = backward_propagation(dh, d1, d2, a0)
+function zh = backward_propagation(dh, d1, d2, a0, P)
     i0 = dh.input_img;
     i2 = dh.distance_1_img;
     D  = dh.distance_2_img;
-    S  = dh.soln_img;
+    S  = dh.soln_img .* sqrt(P);
 
     % remember
     % i0 <- input
@@ -11,10 +11,12 @@ function zh = backward_propagation(dh, d1, d2, a0)
     % i3 = sigma(i2)
     % D  = afm(i3, d2)
     % S  = solution
+    %
+
 
     % we need to take the derivative
     % with respect to input i3
-    dD      = D - S;    % from the quadratic cost function
+    dD      = abs(D) - S;    % from the quadratic cost function
 
     % dD_di3 = afm(180(d2), dD)
     dD_di3  = apply_freq_mask(flip_180(d2), dD);

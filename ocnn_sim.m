@@ -34,10 +34,12 @@
 
         testing_ratio = 0.1;     % 10% of testing data (10k images)
 
-        M_par_exec = 4;          % Number of cores for parallel execution
+        M_par_exec = 2;          % Number of cores for parallel execution
 
-        r1 = nx/8;
-        r2 = nx/27;
+        P = 0.1;
+
+        r1 = nx/6;
+        r2 = nx/25;
 
 % create a plate to detect digits
 plate = detector_plate(Nx, Ny, nx, ny, r1, r2);
@@ -119,7 +121,7 @@ for i=1:1:epoch
         % the bottom below represents the forward pass
         batch  = g_batches(j);
         dh     = forward_propagation(batch, plate, kernel, d1, d2, Nx, Ny, nx, ny, r1, r2, k, a0);
-        dh     = backward_propagation(dh, d1, d2, a0);
+        dh     = backward_propagation(dh, d1, d2, a0, P);
         nabla  = nabla + dh.nabla;
     end
 
