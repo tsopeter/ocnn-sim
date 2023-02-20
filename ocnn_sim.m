@@ -61,7 +61,7 @@ disp("Generating random kernel...");
 % we want to initalize the kernel mask with random phase and amplitude
 % if the kernel exists, uncomment the following
 % kernel = load('data/kernel.mat').kernel;
-kernel = internal_random_amp(Nx, Ny);
+kernel = mask_resize(internal_random_amp(round(ix), round(iy)), Nx, Ny);
         
 % generate the data to train on 
 batch = v_batchwrapper;
