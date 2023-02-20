@@ -19,13 +19,13 @@ function zh = backward_propagation(dh, d1, d2, a0, P)
     dD      = abs(D) - S;    % from the quadratic cost function
 
     % dD_di3 = afm(180(d2), dD)
-    dD_di3  = apply_freq_mask(flip_180(d2), dD);
+    dD_di3  = fftshift(conv2(dD, flip_180(d2), 'same'));
 
     % take derivative of i3 with respect to i2
     di3_di2 = nonlinear_backward(i2, a0);
 
     % take derivative of i2 with respect to i1
-    di2_di1 = apply_freq_mask(flip_180(d1), di3_di2);
+    di2_di1 = fftshift(conv2(di3_di2, flip_180(d1), 'same'));
 
     % take derivative of i1 with respect to dk
     di1_dk  = i0;

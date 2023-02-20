@@ -85,8 +85,6 @@ test_batch.batch = get_batch(test, test.n_images*testing_ratio, 0);
 test_n_imgs = test.n_images * testing_ratio;
 
 % clear unused data for reducing memory reqeuirements
-data = [];
-test = [];
 
 d1   = get_propagation_distance(Nx, Ny, nx, ny, distance_1 ,wavelength);
 d2   = get_propagation_distance(Nx, Ny, nx, ny, distance_2, wavelength);

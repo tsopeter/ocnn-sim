@@ -6,9 +6,9 @@ function dh = forward_propagation(batch, plate, kernel, d1, d2, Nx, Ny, nx, ny, 
 
    nimg  = get_normalized_image(img, Nx, Ny, k);
    img_kernel = nimg .* kernel;
-   img_prop_1 = apply_freq_mask(img_kernel, d1);
+   img_prop_1 = fftshift(conv2(img_kernel, d1, 'same'));
    img_non    = nonlinear_forward(img_prop_1, a0);
-   img_prop_2 = apply_freq_mask(img_non, d2);
+   img_prop_2 = fftshift(conv2(img_non, d2, 'same'));
 
    img_det     = img_prop_2 .* plate;
 
