@@ -34,7 +34,7 @@
 
         testing_ratio = 0.1;     % 10% of testing data (10k images)
 
-        M_par_exec = 3;          % Number of cores for parallel execution
+        M_par_exec = 8;          % Number of cores for parallel execution
 
         P = 1;
 
@@ -84,65 +84,10 @@ test_batch = v_batchwrapper;
 test_batch.batch = get_batch(test, test.n_images*testing_ratio, 0);
 test_n_imgs = test.n_images * testing_ratio;
 
-% clear unused data for reducing memory reqeuirements
-
 d1   = get_propagation_distance(Nx, Ny, nx, ny, distance_1 ,wavelength);
 d2   = get_propagation_distance(Nx, Ny, nx, ny, distance_2, wavelength);
 
-disp("Running first test...");
 
-% run the test functions
-initial_correct = test_a_batch(test_batch.batch, plate, kernel, d1, d2, Nx, Ny, nx, ny, r1, r2, k, a0, M_par_exec);
-
-disp("Initially Correct: "+(initial_correct/test_n_imgs)*100);
-
-% iterate through all training session
-
-itj = 1:1:images_per_epoch;
-dhs(images_per_epoch)= data_handler;
-g_batches = [];
-for i=1:1:epoch
-    disp("@Epoch: "+i);
-
-    batches = superbatches(i);
-
-    disp("Starting training...");
-
-    % get the batches
-    g_batches = batches.batch;
-    
-    %
-    % loop to go through each image per training session
-    nabla = zeros(Ny, Nx);
-    parfor (j=itj, M_par_exec)
-
-        % the bottom below represents the forward pass
-        batch  = g_batches(j);
-        dh     = forward_propagation(batch, plate, kernel, d1, d2, Nx, Ny, nx, ny, r1, r2, k, a0);
-        dh     = backward_propagation(dh, d1, d2, a0, P);
-        nabla  = nabla + dh.nabla;
-    end
-
-    disp("Starting updating kernel...");
-
-    %
-    % start backpropagation for each epoch,
-    % after back propagation, update the kernel mask
-
-    a_nabla  = angle(nabla) * (eta/images_per_epoch);
-    b_nabla  = abs(nabla) * (eta/images_per_epoch);
-
-    a_kernel = abs(kernel) .* exp(-1i * (a_nabla - angle(kernel)));
-    b_kernel = abs(kernel) - b_nabla;
-    kernel   = a_kernel .* b_kernel;
-
-    % at every 5 epochs, run tests
-    if (mod(i, 5) == 0)
-        disp("Starting testing...");
-        correct_per_epoch = test_a_batch(test_batch.batch, plate, kernel, d1, d2, Nx, Ny, nx, ny, r1, r2, k, a0, M_par_exec);
-        disp("@ Epoch="+i+", there was "+(correct_per_epoch/test_n_imgs)*100.0+"% correct.");
-    end
-end
 
 
 
