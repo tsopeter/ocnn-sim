@@ -50,8 +50,21 @@ plate = detector_plate(Nx, Ny, nx, ny, r1, r2);
 
 disp("Getting data...");
 
-datapath = fullfile(matlabroot, 'toolbox', 'mnet', 'nndemos', 'nndatasets', 'DigitDataset');
-data     = imageDatastore(datapath, 'IncludeSubfolders',true,'LabelSource','foldernames');
+
+oldPath       = addpath(fullfile("Images/"));
+dataimagefile = 'Images/train-labels-idx1-ubyte.gz';
+datalabelfile = 'Images/train-labels-idx1-ubyte.gz';
+testimagefile = 'Images/t10k-images-idx3-ubyte.gz';
+testlabelfile = 'Images/t10k-labels-idx1-ubyte.gz';
+
+XTrain = processImagesMNIST(dataimagefile);
+YTrain = processLabelsMNIST(datalabelfile);
+XTest = processImagesMNIST(testimagefile);
+YTest = processLabelsMNIST(testlabelfile);
+
+% restore the path
+addpath(oldPath);
+
 
 % get the interpolation value k
 kx = log2(double(ix - test.n_cols)/double(test.n_cols - 1))+1;
