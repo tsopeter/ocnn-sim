@@ -1,5 +1,5 @@
 function output = circle_at(Nx, Ny, nx, ny, x, y, radius)
-    output = zeros(Ny, Nx);
+    output = gpuArray(zeros(Ny, Nx, 'single'));
 
     dimx = nx/Nx;
     dimy = ny/Ny;

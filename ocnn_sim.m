@@ -25,14 +25,14 @@
         wavelength = 1000e-9;    % wavelength
         
         epoch = 120;              % we want 100 epochs
-        images_per_epoch = 250; % we want 500 images per training session (epoch)
+        images_per_epoch = 300; % we want 500 images per training session (epoch)
         
         distance_1 = 30e-2;      % propagation distance
         distance_2 = 15e-2;
         
-        eta = 12.0;              % learning rate
+        eta = 8.0;              % learning rate
 
-        testing_ratio = 0.1;     % 10% of testing data (10k images)
+        testing_ratio = 0.05;     % 10% of testing data (10k images)
 
         M_par_exec = 8;          % Number of cores for parallel execution
 
@@ -94,7 +94,7 @@ disp("Running first test...");
 % run the test functions
 initial_correct = test_a_batch(test_batch.batch, plate, kernel, d1, d2, Nx, Ny, nx, ny, r1, r2, k, a0, M_par_exec);
 
-disp("Initially Correct: "+(initial_correct/test_n_imgs)*100);
+disp("Initially Correct: "+initial_correct+ " out of "+test_n_imgs);
 
 % iterate through all training session
 
@@ -130,17 +130,16 @@ for i=1:1:epoch
     % after back propagation, update the kernel mask
 
     a_nabla  = angle(nabla) * (eta/images_per_epoch);
-    b_nabla  = abs(nabla) * (eta/images_per_epoch);
+    % b_nabla  = abs(nabla) * (eta/images_per_epoch);
 
     a_kernel = abs(kernel) .* exp(-1i * (a_nabla - angle(kernel)));
-    b_kernel = abs(kernel) - b_nabla;
-    kernel   = a_kernel .* b_kernel;
+    kernel   = a_kernel;
 
     % at every 5 epochs, run tests
     if (mod(i, 5) == 0)
         disp("Starting testing...");
         correct_per_epoch = test_a_batch(test_batch.batch, plate, kernel, d1, d2, Nx, Ny, nx, ny, r1, r2, k, a0, M_par_exec);
-        disp("@ Epoch="+i+", there was "+(correct_per_epoch/test_n_imgs)*100.0+"% correct.");
+        disp("@ Epoch="+i+", there was "+correct_per_epoch+" out of "+test_n_imgs);
     end
 end
 

@@ -1,4 +1,5 @@
-function z = sa_forward(E, a0)
+function z = sa_forward(E)
+    a0 = 20;
     % preserve phase
     g = abs(E);
     p = angle(E);
