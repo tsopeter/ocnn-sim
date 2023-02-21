@@ -28,7 +28,7 @@ function zh = backward_propagation(dh, d1, d2, a0, P)
     dD_di1 = apply_freq_mask(d1.', dD_di2);
 
     % take derivative of i1 with respect to dk
-    dD_dk  = i0 * dD_di1;
+    dD_dk  = i0 .* dD_di1;
 
     zh = data_handler;
     zh.nabla = dD_dk;

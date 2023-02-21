@@ -9,16 +9,16 @@
 
 % define the parameters of the network
 
-        Nx = 256;      % number of columns
-        Ny = 256;      % number of rows
+        Nx = 512;      % number of columns
+        Ny = 512;      % number of rows
         
         % this defines the size of the display
         nx = 20e-3;
         ny = 20e-3;
         
         % interpolation value
-        ix = Nx/3;
-        iy = Ny/3;
+        ix = Nx/2;
+        iy = Ny/2;
         
         a0 = 20;
         
@@ -38,8 +38,8 @@
 
         P = 1;
 
-        r1 = nx/9;
-        r2 = nx/55;
+        r1 = nx/5;
+        r2 = nx/50;
 
 % create a plate to detect digits
 plate = detector_plate(Nx, Ny, nx, ny, r1, r2);
@@ -129,8 +129,8 @@ for i=1:1:epoch
     % start backpropagation for each epoch,
     % after back propagation, update the kernel mask
 
-    nabla  = angle(kernel) - (angle(nabla) * (eta/images_per_epoch));
-    kernel = exp(1i * nabla);
+    nabla  = kernel - (nabla * (eta/images_per_epoch));
+    kernel = nabla;
 
     % at every 5 epochs, run tests
     if (mod(i, 5) == 0)
