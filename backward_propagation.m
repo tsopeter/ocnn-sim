@@ -22,18 +22,14 @@ function zh = backward_propagation(dh, d1, d2, a0, P)
     dD_di3  = apply_freq_mask(d2.', dD);
 
     % take derivative of i3 with respect to i2
-    di3_di2 = nonlinear_backward(i2, a0);
+    dD_di2 = dD_di3 .* nonlinear_backward(i2, a0);
 
     % take derivative of i2 with respect to i1
-    di2_di1 = apply_freq_mask(d1.', di3_di2);
+    dD_di1 = apply_freq_mask(d1.', dD_di2);
 
     % take derivative of i1 with respect to dk
-    di1_dk  = i0;
+    dD_dk  = i0 * dD_di1;
 
-    % compute backpropagation to change the kernel
-    % all other parameters such as distance_1 and distance_2
-    % are to be fixed.
-    dD_dk   = dD_di3 .* di3_di2 .* di2_di1 .* di1_dk;
     zh = data_handler;
     zh.nabla = dD_dk;
 

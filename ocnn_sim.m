@@ -24,8 +24,8 @@
         
         wavelength = 1000e-9;    % wavelength
         
-        epoch = 100;              % we want 100 epochs
-        images_per_epoch = 500; % we want 500 images per training session (epoch)
+        epoch = 120;              % we want 100 epochs
+        images_per_epoch = 250; % we want 500 images per training session (epoch)
         
         distance_1 = 30e-2;      % propagation distance
         distance_2 = 15e-2;
@@ -34,12 +34,12 @@
 
         testing_ratio = 0.1;     % 10% of testing data (10k images)
 
-        M_par_exec = 3;          % Number of cores for parallel execution
+        M_par_exec = 8;          % Number of cores for parallel execution
 
         P = 1;
 
-        r1 = nx/6;
-        r2 = nx/25;
+        r1 = nx/9;
+        r2 = nx/55;
 
 % create a plate to detect digits
 plate = detector_plate(Nx, Ny, nx, ny, r1, r2);
@@ -129,8 +129,8 @@ for i=1:1:epoch
     % start backpropagation for each epoch,
     % after back propagation, update the kernel mask
 
-    nabla  = kernel - (nabla * (eta/images_per_epoch));
-    kernel = nabla;
+    nabla  = angle(kernel) - (angle(nabla) * (eta/images_per_epoch));
+    kernel = exp(1i * nabla);
 
     % at every 5 epochs, run tests
     if (mod(i, 5) == 0)
