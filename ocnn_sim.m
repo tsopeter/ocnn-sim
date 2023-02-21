@@ -13,8 +13,8 @@
         Ny = 256;      % number of rows
         
         % this defines the size of the display
-        nx = 6e-2;
-        ny = 6e-2;
+        nx = 20e-3;
+        ny = 20e-3;
         
         % interpolation value
         ix = Nx/3;
@@ -34,9 +34,9 @@
 
         testing_ratio = 0.1;     % 10% of testing data (10k images)
 
-        M_par_exec = 2;          % Number of cores for parallel execution
+        M_par_exec = 3;          % Number of cores for parallel execution
 
-        P = 0.1;
+        P = 1;
 
         r1 = nx/6;
         r2 = nx/25;
