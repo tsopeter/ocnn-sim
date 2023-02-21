@@ -129,8 +129,12 @@ for i=1:1:epoch
     % start backpropagation for each epoch,
     % after back propagation, update the kernel mask
 
-    nabla  = angle(nabla) * (eta/images_per_epoch);
-    kernel = abs(kernel) .* exp(-1i * (nabla - angle(kernel)));
+    a_nabla  = angle(nabla) * (eta/images_per_epoch);
+    b_nabla  = abs(nabla) * (eta/images_per_epoch);
+
+    a_kernel = abs(kernel) .* exp(-1i * (a_nabla - angle(kernel)));
+    b_kernel = abs(kernel) - b_nabla;
+    kernel   = a_kernel .* b_kernel;
 
     % at every 5 epochs, run tests
     if (mod(i, 5) == 0)
