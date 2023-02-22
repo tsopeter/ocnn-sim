@@ -17,20 +17,18 @@ function zh = backward_propagation(dh, d1, d2, a0, P)
     % we need to take the derivative
     % with respect to input i3
     dD      = abs(D) - S;    % from the quadratic cost function
-    delta_2 = dD .* nonlinear_backward(i2, a0);
-    dD_dk   = i0 .* delta_2;
 
     % dD_di3 = afm(180(d2), dD)
-    %dD_di3  = apply_freq_mask(d2.', dD);
+    dD_di3  = conv2(dD, rot90(fftshift(d2), 2), 'same');
 
     % take derivative of i3 with respect to i2
-    %dD_di2 = dD_di3 .* nonlinear_backward(i2, a0);
+    dD_di2 = dD_di3 .* nonlinear_backward(i2, a0);
 
     % take derivative of i2 with respect to i1
-    %dD_di1 = apply_freq_mask(d1.', dD_di2);
+    dD_di1 = conv2(dD_di2, rot90(fftshift(d1), 2), 'same');
 
     % take derivative of i1 with respect to dk
-    %dD_dk  = i0 .* dD_di1;
+    dD_dk  = i0 .* dD_di1;
 
     zh = data_handler;
     zh.nabla = dD_dk;

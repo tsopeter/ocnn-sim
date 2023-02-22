@@ -9,8 +9,8 @@
 
 % define the parameters of the network
 
-        Nx = 512;      % number of columns
-        Ny = 512;      % number of rows
+        Nx = 1024;      % number of columns
+        Ny = 1024;      % number of rows
         
         % this defines the size of the display
         nx = 20e-3;
@@ -24,15 +24,15 @@
         
         wavelength = 1000e-9;    % wavelength
         
-        epoch = 120;              % we want 100 epochs
-        images_per_epoch = 300; % we want 500 images per training session (epoch)
+        epoch = 10000;              % we want 100 epochs
+        images_per_epoch = 16; % we want 500 images per training session (epoch)
         
-        distance_1 = 30e-2;      % propagation distance
+        distance_1 = 15e-2;      % propagation distance
         distance_2 = 15e-2;
         
-        eta = 8.0;              % learning rate
+        eta = 0.005;              % learning rate
 
-        testing_ratio = 0.05;     % 10% of testing data (10k images)
+        testing_ratio = 0.1;     % 10% of testing data (10k images)
 
         M_par_exec = 8;          % Number of cores for parallel execution
 
@@ -86,8 +86,8 @@ test_n_imgs = test.n_images * testing_ratio;
 
 % clear unused data for reducing memory reqeuirements
 
-d1   = get_propagation_distance(Nx, Ny, nx, ny, distance_1 ,wavelength);
-d2   = get_propagation_distance(Nx, Ny, nx, ny, distance_2, wavelength);
+d1   = get_propagation_distance(round(ix), round(iy), nx/2, ny/2, distance_1 ,wavelength);
+d2   = get_propagation_distance(round(ix), round(iy), nx/2, ny/2, distance_2, wavelength);
 
 disp("Running first test...");
 
@@ -120,7 +120,7 @@ for i=1:1:epoch
         batch  = g_batches(j);
         dh     = forward_propagation(batch, plate, kernel, d1, d2, Nx, Ny, nx, ny, r1, r2, k, a0);
         dh     = backward_propagation(dh, d1, d2, a0, P);
-        nabla  = nabla + dh.nabla;
+        nabla  = nabla + angle(dh.nabla);
     end
 
     disp("Starting updating kernel...");
@@ -129,14 +129,14 @@ for i=1:1:epoch
     % start backpropagation for each epoch,
     % after back propagation, update the kernel mask
 
-    a_nabla  = angle(nabla) * (eta/images_per_epoch);
+    a_nabla  = nabla * (eta/images_per_epoch);
     % b_nabla  = abs(nabla) * (eta/images_per_epoch);
 
     a_kernel = abs(kernel) .* exp(-1i * (a_nabla - angle(kernel)));
     kernel   = a_kernel;
 
     % at every 5 epochs, run tests
-    if (mod(i, 5) == 0)
+    if (mod(i, 200) == 0)
         disp("Starting testing...");
         correct_per_epoch = test_a_batch(test_batch.batch, plate, kernel, d1, d2, Nx, Ny, nx, ny, r1, r2, k, a0, M_par_exec);
         disp("@ Epoch="+i+", there was "+correct_per_epoch+" out of "+test_n_imgs);
