@@ -122,7 +122,7 @@ for i=1:1:epoch
 
         % the bottom below represents the forward pass
         batch  = get_batch(data, images_per_epoch, 1);
-        dh     = forward_propagation(batch, plate, kernel, d1, d2, Nx, Ny, nx, ny, r1, r2, k, size_d2_ix, sizee_d2_iy, ratio_ix, ratio_iy, a0);
+        dh     = forward_propagation(batch, plate, kernel, d1, d2, Nx, Ny, nx, ny, r1, r2, k, size_d2_ix, size_d2_iy, ratio_ix, ratio_iy, a0);
         dh     = backward_propagation(dh, rd1, rd2, a0, P);
         nabla  = nabla + angle(dh.nabla);
     end
