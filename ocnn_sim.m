@@ -90,7 +90,7 @@ ratio_iy     = (size_d2_iy / Ny) * ny;
 % create a plate to detect digits
 disp("Creating detector plate...");
 
-r1 = ratio_ix / 2;
+r1 = ratio_ix / 3.5;
 r2 = ratio_iy / 25;
 
 plate = detector_plate(size_d2_ix, size_d2_ix, ratio_ix, ratio_iy, r1, r2);
@@ -125,9 +125,11 @@ for i=1:1:epoch
         % the bottom below represents the forward pass
         btc = batch(j);
 
-        dh     = forward_propagation(btc, plate, kernel, d1, d2, Nx, Ny, nx, ny, r1, r2, k, size_d2_ix, size_d2_iy, ratio_ix, ratio_iy, a0);
-        dh     = backward_propagation(dh, rd1, rd2, a0, P);
-        nabla  = nabla + dh.nabla;
+        real_dh     = forward_propagation(btc, plate, real(kernel), real(d1), real(d2), Nx, Ny, nx, ny, r1, r2, k, size_d2_ix, size_d2_iy, ratio_ix, ratio_iy, a0);
+        imag_dh     = forward_propagation(btc, plate, imag(kernel), imag(d1), imag(d2), Nx, Ny, nx, ny, r1, r2, k, size_d2_ix, size_d2_iy, ratio_ix, ratio_iy, a0);
+        real_dh     = backward_propagation(real_dh, real(rd1), real(rd2), a0, P);
+        imag_dh     = backward_propagation(imag_dh, imag(rd1), imag(rd2), a0, P);
+        nabla  = nabla + (real_dh.nabla + 1i * imag_dh.nabla);
     end
 
     disp("Starting updating kernel...");
