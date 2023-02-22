@@ -62,21 +62,6 @@ disp("Generating random kernel...");
 % if the kernel exists, uncomment the following
 % kernel = load('data/kernel.mat').kernel;
 kernel = mask_resize(internal_random_amp(round(ix), round(iy)), Nx, Ny);
-        
-% generate the data to train on 
-batch = v_batchwrapper;
-batch.batch = get_batch(data, images_per_epoch, 1);
-superbatches(epoch) = batch;    %   a superbatch consists of [a, b, c...d]
-                                %   where each are v_batchwrappers
-                                %   each v_batchwrappers contains an 1xM
-                                %   vector of of batches
-
-disp("Generating batches...");
-for i=1:1:epoch-1
-    batch = v_batchwrapper;
-    batch.batch = get_batch(data, images_per_epoch, 1);
-    superbatches(i) = batch;
-end
 
 disp("Generating test bach...");
 % create a batch to operate testing on
@@ -86,8 +71,11 @@ test_n_imgs = test.n_images * testing_ratio;
 
 % clear unused data for reducing memory reqeuirements
 
-d1   = get_propagation_distance(round(ix), round(iy), nx/2, ny/2, distance_1 ,wavelength);
-d2   = get_propagation_distance(round(ix), round(iy), nx/2, ny/2, distance_2, wavelength);
+d1   = fftshift(get_propagation_distance(round(ix), round(iy), nx/2, ny/2, distance_1 ,wavelength));
+d2   = fftshift(get_propagation_distance(round(ix), round(iy), nx/2, ny/2, distance_2, wavelength));
+
+rd1  = rot90(d1, 2);
+rd2  = rot90(d2, 2);
 
 disp("Running first test...");
 
@@ -104,12 +92,7 @@ g_batches = [];
 for i=1:1:epoch
     disp("@Epoch: "+i);
 
-    batches = superbatches(i);
-
     disp("Starting training...");
-
-    % get the batches
-    g_batches = batches.batch;
     
     %
     % loop to go through each image per training session
@@ -117,9 +100,9 @@ for i=1:1:epoch
     parfor (j=itj, M_par_exec)
 
         % the bottom below represents the forward pass
-        batch  = g_batches(j);
+        batch  = get_batch(data, images_per_epoch, 1);
         dh     = forward_propagation(batch, plate, kernel, d1, d2, Nx, Ny, nx, ny, r1, r2, k, a0);
-        dh     = backward_propagation(dh, d1, d2, a0, P);
+        dh     = backward_propagation(dh, rd1, rd2, a0, P);
         nabla  = nabla + angle(dh.nabla);
     end
 
