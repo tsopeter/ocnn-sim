@@ -50,9 +50,8 @@ plate = detector_plate(Nx, Ny, nx, ny, r1, r2);
 
 disp("Getting data...");
 
-
-oldPath       = addpath(fullfile("Images/"));
-dataimagefile = 'Images/train-labels-idx1-ubyte.gz';
+oldPath       = addpath(fullfile("~/Documents/GitHub/ocnn-sim/Images/"));
+dataimagefile = 'Images/train-images-idx3-ubyte.gz';
 datalabelfile = 'Images/train-labels-idx1-ubyte.gz';
 testimagefile = 'Images/t10k-images-idx3-ubyte.gz';
 testlabelfile = 'Images/t10k-labels-idx1-ubyte.gz';
@@ -62,16 +61,18 @@ YTrain = processLabelsMNIST(datalabelfile);
 XTest = processImagesMNIST(testimagefile);
 YTest = processLabelsMNIST(testlabelfile);
 
-% restore the path
-addpath(oldPath);
-
+cols = length(XTrain(:,:,1));
+rows = length(XTrain(:,:,1).');
 
 % get the interpolation value k
-kx = log2(double(ix - test.n_cols)/double(test.n_cols - 1))+1;
-ky = log2(double(iy - test.n_rows)/double(test.n_rows - 1))+1;
+kx = log2(double(ix - cols)/double(cols - 1))+1;
+ky = log2(double(iy - rows)/double(rows - 1))+1;
 
 % get the lowest interpolation value
 k = min(kx, ky);
+
+% restore the path
+addpath(oldPath);
 
 d1   = get_propagation_distance(round(ix), round(iy), nx/ratio, ny/ratio, distance_1, wavelength);
 
