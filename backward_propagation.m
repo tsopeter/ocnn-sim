@@ -1,4 +1,4 @@
-function zh = backward_propagation(type, dh, rd1, rd2, a0, P)
+function zh = backward_propagation(t, dh, rd1, rd2, a0, P)
     i0 = dh.input_img;
     i2 = dh.distance_1_img;
     D  = dh.distance_2_img;
@@ -16,14 +16,12 @@ function zh = backward_propagation(type, dh, rd1, rd2, a0, P)
 
     % we need to take the derivative
     % with respect to input i3
-    dD      = abs(D) - S;    % from the quadratic cost function
+    dD      = abs(D) - S;   % from the quadratic cost function
 
-    % dD_di3 = afm(180(d2), dD)
     dD_di3  = conv2(rd2, dD, 'full');
 
     % take derivative of i3 with respect to i2
-
-    if type==1
+    if t==1
         dD_di2 = dD_di3 .* nonlinear_backward(i2, a0);
     else
         dD_di2 = dD_di3;

@@ -1,4 +1,4 @@
-function dh = forward_propagation(type, batch, plate, kernel, d1, d2, Nx, Ny, nx, ny, r1, r2, k, dix, diy, rix, riy, a0)
+function dh = forward_propagation(t, batch, plate, kernel, d1, d2, Nx, Ny, nx, ny, r1, r2, k, dix, diy, rix, riy, a0)
    img   = batch.img;
    label = batch.label;
 
@@ -8,7 +8,7 @@ function dh = forward_propagation(type, batch, plate, kernel, d1, d2, Nx, Ny, nx
    img_kernel = nimg .* kernel;
    img_prop_1 = conv2(img_kernel, d1, 'valid');
 
-   if type==1
+   if t==1
        img_non = nonlinear_forward(img_prop_1, a0);
    else
        img_non = img_prop_1;
