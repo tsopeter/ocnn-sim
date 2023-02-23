@@ -122,6 +122,11 @@ for i=1:1:epoch
 
     batch = get_batch(data, images_per_epoch, 1);
 
+    %
+    % start training,
+    % each training session involves a forward propagation pass
+    % and a backward propagation pass.
+    % Executes each pair per core.
     parfor (j=itj, M_par_exec)
 
         % the bottom below represents the forward pass
@@ -136,10 +141,6 @@ for i=1:1:epoch
     end
 
     disp("Starting updating kernel...");
-
-    %
-    % start backpropagation for each epoch,
-    % after back propagation, update the kernel mask
 
     a_nabla  = nabla_abs * (eta1/images_per_epoch);
     b_nabla  = nabla_ang * (eta2/images_per_epoch);
