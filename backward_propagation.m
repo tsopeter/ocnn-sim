@@ -16,7 +16,7 @@ function zh = backward_propagation(t, dh, rd1, rd2, a0, P)
 
     % we need to take the derivative
     % with respect to input i3
-    dD      = abs(D) - S; s   % from the quadratic cost function
+    dD      = abs(D) - S;   % from the quadratic cost function
 
     dD_di3  = conv2(rd2, dD, 'full');
 
