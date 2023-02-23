@@ -144,8 +144,9 @@ for i=1:1:epoch
 
     a_nabla  = nabla_abs * (eta1/images_per_epoch);
     b_nabla  = nabla_ang * (eta2/images_per_epoch);
+    k_nabla  = a_nabla .* exp(1i * k_nabla);
 
-    kernel   = (abs(kernel) - a_nabla) .* exp(1i * (angle(kernel) - b_nabla));
+    kernel   = kernel - k_nabla;
     % kernel   = kernelLimit(kernel);
     % at every 5 epochs, run tests
     if (mod(i, 5) == 0)
