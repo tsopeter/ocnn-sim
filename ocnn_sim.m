@@ -33,7 +33,8 @@
         distance_1 = 50e-2;      % propagation distance
         distance_2 = 15e-2;
         
-        eta = 1.2;              % learning rate
+        eta1 = 1.2;              % learning rate
+        eta2 = 10.5;             % 
 
         testing_ratio = 0.1;     % 10% of testing data (10k images)
 
@@ -140,8 +141,8 @@ for i=1:1:epoch
     % start backpropagation for each epoch,
     % after back propagation, update the kernel mask
 
-    a_nabla  = nabla_abs * (eta/images_per_epoch);
-    b_nabla  = nabla_ang * (eta/images_per_epoch);
+    a_nabla  = nabla_abs * (eta1/images_per_epoch);
+    b_nabla  = nabla_ang * (eta2/images_per_epoch);
 
     kernel   = (abs(kernel) - a_nabla) .* exp(1i * (angle(kernel) - b_nabla));
     % at every 5 epochs, run tests
