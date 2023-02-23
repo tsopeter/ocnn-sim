@@ -34,7 +34,7 @@
         distance_2 = 15e-2;
         
         eta1 = 1.2;              % learning rate
-        eta2 = 3.5;              % 
+        eta2 = 1.2;              % 
 
         testing_ratio = 0.1;     % 10% of testing data (10k images)
 
@@ -133,8 +133,8 @@ for i=1:1:epoch
         btc = batch(j);
         
         dh         = forward_propagation(1, btc, plate, kernel, d1, d2, Nx, Ny, nx, ny, r1, r2, k, size_d2_ix, size_d2_iy, ratio_ix, ratio_iy, a0);
-        real_dh     = datahandler();
-        imag_dh     = datahandler();
+        real_dh     = data_handler();
+        imag_dh     = data_handler();
 
         real_dh.input_img      = real(dh.input_img);
         imag_dh.input_img      = imag(dh.input_img);
@@ -144,6 +144,9 @@ for i=1:1:epoch
 
         real_dh.distance_2_img = real(dh.distance_2_img);
         imag_dh.distance_2_img = imag(dh.distance_2_img);
+
+        real_dh.soln_img       = dh.soln_img;
+        imag_dh.soln_img       = dh.soln_img;
 
         real_dh     = backward_propagation(1, real_dh, real(rd1), real(rd2), a0, P);
         imag_dh     = backward_propagation(1, imag_dh, imag(rd1), imag(rd2), a0, P);
