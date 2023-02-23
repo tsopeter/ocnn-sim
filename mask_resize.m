@@ -1,5 +1,5 @@
 function output = mask_resize(input, Nx, Ny)    % function resizes and places in the middle. Assumes that the input is smaller than the result
-    output = gpuArray(zeros(Ny, Nx, 'single'));
+    output = zeros(Ny, Nx, 'single');
 
     % get the center of the matrix
     centerx = round(Nx/2);

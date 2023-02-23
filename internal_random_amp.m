@@ -1,5 +1,5 @@
 function output = internal_random_amp(Nx, Ny)
-    output = gpuArray(zeros(Nx, Ny, 'single'));
+    output = zeros(Ny, Nx, 'single');
     for i=1:1:Nx
         for j=1:1:Ny
             v = normrnd(0, 1);
