@@ -117,8 +117,8 @@ for i=1:1:epoch
     
     %
     % loop to go through each image per training session
-    nabla_real = zeros(Ny, Nx, 'single');
-    nabla_imag = zeros(Ny, Nx, 'single');
+    nabla_real = gpuArray(zeros(Ny, Nx, 'single'));
+    nabla_imag = gpuArray(zeros(Ny, Nx, 'single'));
 
     batch = get_batch(data, images_per_epoch, 1);
 
