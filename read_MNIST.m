@@ -28,7 +28,7 @@ function output = read_MNIST(datafile, labelfile)
             ste = n_cols * j;
             temp(:,j)=vec(stx:ste, 1);
         end
-        img.data = gpuArray(temp');
+        img.data = temp';
         img.n_rows = n_rows;
         img.n_cols = n_cols;
         parsed_images(i) = img;
