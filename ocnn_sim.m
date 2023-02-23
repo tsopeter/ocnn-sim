@@ -146,6 +146,7 @@ for i=1:1:epoch
     b_nabla  = nabla_ang * (eta2/images_per_epoch);
 
     kernel   = (abs(kernel) - a_nabla) .* exp(1i * (angle(kernel) - b_nabla));
+    % kernel   = kernelLimit(kernel);
     % at every 5 epochs, run tests
     if (mod(i, 5) == 0)
         disp("Starting testing...");
