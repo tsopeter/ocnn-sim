@@ -34,7 +34,7 @@
         distance_2 = 15e-2;
         
         eta1 = 1.2;              % learning rate
-        eta2 = 10.5;             % 
+        eta2 = 3.5;              % 
 
         testing_ratio = 0.1;     % 10% of testing data (10k images)
 
