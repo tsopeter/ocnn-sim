@@ -1,31 +1,38 @@
-function zh = backward_propagation(dh, plate, distance_1, distance_2, wavelength, Nx, Ny, nx, ny, a0)
+function zh = backward_propagation(type, dh, rd1, rd2, a0, P)
     i0 = dh.input_img;
     i2 = dh.distance_1_img;
-    D  = dh.result_img;
-    S  = dh.soln_img;
+    D  = dh.distance_2_img;
+    S  = dh.soln_img .* sqrt(P);
 
-    m  = plate;
-
+    % remember
+    % i0 <- input
+    % i1 = i0 .* kernel
+    % i2 = afm(i1, d1)
+    % i3 = sigma(i2)
+    % D  = afm(i3, d2)
+    % S  = solution
     %
-    %   Let the following structure define the chain
-    %   K  -> D1 -> N  -> D2 -> M  -> D
-    %   R1 -> R2 -> R3 -> R4 -> R5
-    %   
-        
-    d1      = get_propagation_distance(Nx, Ny, nx, ny, distance_1, wavelength);
-    d2      = get_propagation_distance(Nx, Ny, nx, ny, distance_2, wavelength);
 
-    dD      = D - S;
-    dD_di4  = m;
-    dD_di3  = apply_freq_mask(flip_180(d2), dD_di4);
-    di3_di2 = nonlinear_backward(i2, a0);
-    di3_di1 = apply_freq_mask(flip_180(d1), di3_di2);
-    di1_dk  = i0;
 
-    % compute backpropagation to change the kernel
-    % all other parameters such as distance_1 and distance_2
-    % are to be fixed.
-    dD_dk   = dD .* dD_di3 .* di3_di1 .* di1_dk;
+    % we need to take the derivative
+    % with respect to input i3
+    dD      = abs(D) - S;    % from the quadratic cost function
+
+    dD_di3  = conv2(rd2, dD, 'full');
+
+    % take derivative of i3 with respect to i2
+    if type==1
+        dD_di2 = dD_di3 .* nonlinear_backward(i2, a0);
+    else
+        dD_di2 = dD_di3;
+    end
+
+    % take derivative of i2 with respect to i1
+    dD_di1 = conv2(rd1, dD_di2, 'full');
+
+    % take derivative of i1 with respect to dk
+    %dD_dk  = i0 .* dD_di1;
+
     zh = data_handler;
     zh.nabla = dD_dk;
 

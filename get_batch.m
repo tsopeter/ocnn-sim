@@ -1,7 +1,7 @@
 function batch = get_batch(data, n_perbatch, random_flag)
     n_images = data.n_images;
 
-    if(random_flag==1)
+    if (random_flag==1)
         r = randi([1, n_images], 1, n_perbatch);
     else
         r = 1:n_perbatch;
