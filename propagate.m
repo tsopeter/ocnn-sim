@@ -15,5 +15,5 @@ function output = propagate(input, distance, wavelength, Nx, Ny, nx, ny)
     kz = 2 * pi * sqrt((1/wavelength)^2 -(fxx.^2)-(fyy.^2));
     
     fftE = fftc .* exp(1j * (kz) * distance);
-    output = ifft2(ifftshift(fftE));
+    output = gpuArray(ifft2(ifftshift(fftE)));
 end

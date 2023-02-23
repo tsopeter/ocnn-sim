@@ -5,7 +5,7 @@ function output = detector_plate(Nx, Ny, nx, ny, radius1, radius2)
 
     % design the detector plate
 
-    plate = zeros(Ny, Nx, 'single');
+    plate = gpuArray(zeros(Ny, Nx, 'single'));
 
     % at every 36 degrees, put a circle of radius2 at radius1
     for r=0:36:324

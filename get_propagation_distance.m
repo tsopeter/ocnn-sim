@@ -13,5 +13,5 @@ function z = get_propagation_distance(Nx, Ny, nx, ny, distance, wavelength)
     kz = 2 * pi * sqrt((1/wavelength)^2 -(fxx.^2)-(fyy.^2));
 
     z = exp(1i * kz * distance);
-    z = ifft2(ifftshift(z));
+    z = gpuArray(ifft2(ifftshift(z)));
 end
