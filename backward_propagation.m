@@ -1,4 +1,4 @@
-function zh = backward_propagation(dh, rd1, rd2, a0, P)
+function zh = backward_propagation(type, dh, rd1, rd2, a0, P)
     i0 = dh.input_img;
     i2 = dh.distance_1_img;
     D  = dh.distance_2_img;
@@ -22,7 +22,12 @@ function zh = backward_propagation(dh, rd1, rd2, a0, P)
     dD_di3  = conv2(rd2, dD, 'full');
 
     % take derivative of i3 with respect to i2
-    dD_di2 = dD_di3 .* nonlinear_backward(i2, a0);
+
+    if type==1
+        dD_di2 = dD_di3 .* nonlinear_backward(i2, a0);
+    else
+        dD_di2 = dD_di3;
+    end
 
     % take derivative of i2 with respect to i1
     dD_di1 = conv2(rd1, dD_di2, 'full');

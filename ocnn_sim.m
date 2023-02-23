@@ -116,7 +116,8 @@ for i=1:1:epoch
     
     %
     % loop to go through each image per training session
-    nabla = zeros(Ny, Nx, 'single');
+    nabla_abs = zeros(Ny, Nx, 'single');
+    nabla_ang = zeros(Ny, Nx, 'single');
 
     batch = get_batch(data, images_per_epoch, 1);
 
@@ -125,11 +126,12 @@ for i=1:1:epoch
         % the bottom below represents the forward pass
         btc = batch(j);
 
-        real_dh     = forward_propagation(btc, plate, real(kernel), real(d1), real(d2), Nx, Ny, nx, ny, r1, r2, k, size_d2_ix, size_d2_iy, ratio_ix, ratio_iy, a0);
-        imag_dh     = forward_propagation(btc, plate, imag(kernel), imag(d1), imag(d2), Nx, Ny, nx, ny, r1, r2, k, size_d2_ix, size_d2_iy, ratio_ix, ratio_iy, a0);
-        real_dh     = backward_propagation(real_dh, real(rd1), real(rd2), a0, P);
-        imag_dh     = backward_propagation(imag_dh, imag(rd1), imag(rd2), a0, P);
-        nabla  = nabla + (real_dh.nabla + 1i * imag_dh.nabla);
+        abs_dh     = forward_propagation(1, btc, plate, abs(kernel)  , abs(d1)  , abs(d2)  , Nx, Ny, nx, ny, r1, r2, k, size_d2_ix, size_d2_iy, ratio_ix, ratio_iy, a0);
+        ang_dh     = forward_propagation(0, btc, plate, angle(kernel), angle(d1), angle(d2), Nx, Ny, nx, ny, r1, r2, k, size_d2_ix, size_d2_iy, ratio_ix, ratio_iy, a0);
+        abs_dh     = backward_propagation(abs_dh, abs(rd1)  , abs(rd2), a0, P);
+        ang_dh     = backward_propagation(ang_dh, angle(rd1), angle(rd2), a0, P);
+        nabla_abs  = nabla_abs + abs_dh.nabla;
+        nabla_ang  = nabla_ang + ang_dh.nabla;
     end
 
     disp("Starting updating kernel...");
@@ -138,11 +140,10 @@ for i=1:1:epoch
     % start backpropagation for each epoch,
     % after back propagation, update the kernel mask
 
-    a_nabla  = nabla * (eta/images_per_epoch);
-    % b_nabla  = abs(nabla) * (eta/images_per_epoch);
+    a_nabla  = nabla_abs * (eta/images_per_epoch);
+    b_nabla  = nabla_ang * (eta/images_per_epoch);
 
-    kernel   = kernel - a_nabla;
-
+    kernel   = (abs(kernel) - a_nabla) .* exp(1i * (angle(kernel) - b_nabla));
     % at every 5 epochs, run tests
     if (mod(i, 5) == 0)
         disp("Starting testing...");
