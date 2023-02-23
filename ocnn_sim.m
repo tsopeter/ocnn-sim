@@ -128,8 +128,8 @@ for i=1:1:epoch
 
         abs_dh     = forward_propagation(1, btc, plate, abs(kernel)  , abs(d1)  , abs(d2)  , Nx, Ny, nx, ny, r1, r2, k, size_d2_ix, size_d2_iy, ratio_ix, ratio_iy, a0);
         ang_dh     = forward_propagation(0, btc, plate, angle(kernel), angle(d1), angle(d2), Nx, Ny, nx, ny, r1, r2, k, size_d2_ix, size_d2_iy, ratio_ix, ratio_iy, a0);
-        abs_dh     = backward_propagation(abs_dh, abs(rd1)  , abs(rd2), a0, P);
-        ang_dh     = backward_propagation(ang_dh, angle(rd1), angle(rd2), a0, P);
+        abs_dh     = backward_propagation(1, abs_dh, abs(rd1)  , abs(rd2), a0, P);
+        ang_dh     = backward_propagation(0, ang_dh, angle(rd1), angle(rd2), a0, P);
         nabla_abs  = nabla_abs + abs_dh.nabla;
         nabla_ang  = nabla_ang + ang_dh.nabla;
     end
