@@ -42,7 +42,7 @@
         P = 0.5;
 
         read_MNIST_flag  = 0;     % zero the flag is already read!!
-        load_KERNEL_flag = 0;     % zero the flag if kernel needs to be generated
+        load_KERNEL_flag = 1;     % zero the flag if kernel needs to be generated
 
 disp("Getting data...");
 
@@ -68,7 +68,8 @@ if (load_KERNEL_flag == 0)
     kernel = mask_resize(internal_random_amp(round(ix), round(iy)), Nx, Ny);
 else
     disp("Grabbing pre-computed kernel...");
-    kernel = load('data\kernel.mat');
+    kernel_fd = load('data\kernel.mat');
+    kernel    = kernel_fd.kernel;
 end
 
 disp("Generating test bach...");
