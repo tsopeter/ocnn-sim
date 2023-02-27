@@ -33,20 +33,24 @@
         distance_1 = 50e-2;      % propagation distance
         distance_2 = 15e-2;
         
-        eta1 = 1.2;              % learning rate
-        eta2 = 1.2;              % 
+        eta = 0.05;              % learning rate
 
         testing_ratio = 0.1;     % 10% of testing data (10k images)
 
-        M_par_exec = 3;          % Number of cores for parallel execution
+        M_par_exec = 2;          % Number of cores for parallel execution
 
-        P = 1;
+        P = 0.5;
+
+        read_MNIST_flag  = 0;     % zero the flag is already read!!
+        load_KERNEL_flag = 0;     % zero the flag if kernel needs to be generated
 
 disp("Getting data...");
 
 % load the mnist data into a MxM matrix format
-data  = read_MNIST('training/images', 'training/labels');
-test  = read_MNIST('testing/images', 'testing/labels');
+if (read_MNIST_flag == 1)
+    data  = read_MNIST('training/images', 'training/labels');
+    test  = read_MNIST('testing/images', 'testing/labels');
+end
 
 % get the interpolation value k
 kx = log2(double(ix - data.n_cols)/double(data.n_cols - 1))+1;
@@ -60,7 +64,12 @@ disp("Generating random kernel...");
 % we want to initalize the kernel mask with random phase and amplitude
 % if the kernel exists, uncomment the following
 % kernel = load('data/kernel.mat').kernel;
-kernel = mask_resize(internal_random_amp(round(ix), round(iy)), Nx, Ny);
+if (load_KERNEL_flag == 1)
+    kernel = mask_resize(internal_random_amp(round(ix), round(iy)), Nx, Ny);
+else
+    disp("Grabbing pre-computed kernel...");
+    kernel = load('data\kernel.mat');
+end
 
 disp("Generating test bach...");
 % create a batch to operate testing on
@@ -94,10 +103,14 @@ disp("Creating detector plate...");
 r1 = ratio_ix / 3.5;
 r2 = ratio_iy / 25;
 
+% create the detector plate,
+% the detector plate is used for detecting digits
 plate = detector_plate(size_d2_ix, size_d2_ix, ratio_ix, ratio_iy, r1, r2);
 
-rd1  = rot90(d1, 2);
-rd2  = rot90(d2, 2);
+% take the hermitian of the convolution kernels
+% used for backpropagation
+rd1  = d1';
+rd2  = d2';
 
 disp("Running first test...");
 
@@ -109,7 +122,6 @@ disp("Initially Correct: "+initial_correct+ " out of "+test_n_imgs);
 % iterate through all training session
 
 itj = 1:1:images_per_epoch;
-dhs(images_per_epoch)= data_handler;
 for i=1:1:epoch
     disp("@Epoch: "+i);
 
@@ -117,49 +129,26 @@ for i=1:1:epoch
     
     %
     % loop to go through each image per training session
-    nabla_real = gpuArray(zeros(Ny, Nx, 'single'));
-    nabla_imag = gpuArray(zeros(Ny, Nx, 'single'));
+    nabla = gpuArray(zeros(Ny, Nx, 'single'));
 
-    batch = get_batch(data, images_per_epoch, 1);
-
-    %
-    % start training,
-    % each training session involves a forward propagation pass
-    % and a backward propagation pass.
-    % Executes each pair per core.
+    batches = get_batch(data, images_per_epoch, 1);
     parfor (j=itj, M_par_exec)
 
         % the bottom below represents the forward pass
-        btc = batch(j);
-        
-        dh         = forward_propagation(1, btc, plate, kernel, d1, d2, Nx, Ny, nx, ny, r1, r2, k, size_d2_ix, size_d2_iy, ratio_ix, ratio_iy, a0);
-        real_dh     = data_handler();
-        imag_dh     = data_handler();
-
-        real_dh.input_img      = real(dh.input_img);
-        imag_dh.input_img      = imag(dh.input_img);
-
-        real_dh.distance_1_img = real(dh.distance_1_img);
-        imag_dh.distance_1_img = imag(dh.distance_1_img);
-
-        real_dh.distance_2_img = real(dh.distance_2_img);
-        imag_dh.distance_2_img = imag(dh.distance_2_img);
-
-        real_dh.soln_img       = dh.soln_img;
-        imag_dh.soln_img       = dh.soln_img;
-
-        real_dh     = backward_propagation(1, real_dh, real(rd1), real(rd2), a0, P);
-        imag_dh     = backward_propagation(1, imag_dh, imag(rd1), imag(rd2), a0, P);
-
-        nabla_real  = nabla_real + real_dh.nabla;
-        nabla_imag  = nabla_imag + imag_dh.nabla;
+        batch     = batches(j);
+        dh        = forward_propagation(batch, plate, kernel, d1, d2, Nx, Ny, nx, ny, r1, r2, k, size_d2_ix, size_d2_iy, ratio_ix, ratio_iy, a0);
+        dh        = backward_propagation(dh, rd1, rd2, a0, P);
+        nabla = nabla + dh.nabla;
     end
 
     disp("Starting updating kernel...");
 
-    a_nabla  = nabla_real * (eta1/images_per_epoch);
-    b_nabla  = nabla_imag * (eta2/images_per_epoch);
-    k_nabla  = a_nabla + 1i * b_nabla;
+    %
+    % start backpropagation for each epoch,
+    % after back propagation, update the kernel mask
+
+    nabla  = nabla * (eta/images_per_epoch);
+    kernel = kernel - nabla;
 
     kernel   = kernel - k_nabla;
     % kernel   = kernelLimit(kernel);

@@ -9,7 +9,7 @@ function location = detector_location(input, Nx, Ny, nx, ny, radius1, radius2)
         plate  = imrotate(plate, 36*r, 'crop');
 
         result = input .* plate;
-        z      = sum(sum(abs(result).^2));
+        z      = sum(sum(abs(result)));
         if (z > m)
             j = r;
             m = z;

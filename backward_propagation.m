@@ -21,11 +21,7 @@ function zh = backward_propagation(t, dh, rd1, rd2, a0, P)
     dD_di3  = conv2(rd2, dD, 'full');
 
     % take derivative of i3 with respect to i2
-    if t==1
-        dD_di2 = dD_di3 .* nonlinear_backward(i2, a0);
-    else
-        dD_di2 = dD_di3;
-    end
+    dD_di2 = dD_di3 .* conj(nonlinear_backward(i2, a0));
 
     % take derivative of i2 with respect to i1
     dD_di1 = conv2(rd1, dD_di2, 'full');
