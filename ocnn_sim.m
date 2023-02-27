@@ -33,13 +33,13 @@
         distance_1 = 50e-2;      % propagation distance
         distance_2 = 15e-2;
         
-        eta = 0.005;              % learning rate
+        eta = 0.05;              % learning rate
 
         testing_ratio = 0.1;     % 10% of testing data (10k images)
 
         M_par_exec = 8;          % Number of cores for parallel execution
 
-        P = 1;
+        P = 0.5;
 
 disp("Getting data...");
 
@@ -108,7 +108,6 @@ disp("Initially Correct: "+initial_correct+ " out of "+test_n_imgs);
 % iterate through all training session
 
 itj = 1:1:images_per_epoch;
-dhs(images_per_epoch) = data_handler;
 g_batches = [];
 for i=1:1:epoch
     disp("@Epoch: "+i);
@@ -117,19 +116,16 @@ for i=1:1:epoch
     
     %
     % loop to go through each image per training session
-    nabla_abs = zeros(Ny, Nx, 'single');
-    nabla_ang = zeros(Ny, Nx, 'single');
+    nabla = gpuArray(zeros(Ny, Nx, 'single'));
+
+    batches = get_batch(data, images_per_epoch, 1);
     parfor (j=itj, M_par_exec)
 
         % the bottom below represents the forward pass
-        batch     = get_batch(data, images_per_epoch, 1);
-        dh        = forward_propagation(batch, plate, abs(kernel), abs(d1), abs(d2), Nx, Ny, nx, ny, r1, r2, k, size_d2_ix, size_d2_iy, ratio_ix, ratio_iy, a0);
-        dh        = backward_propagation(dh, abs(rd1), abs(rd2), a0, P);
-        nabla_abs = nabla_abs + dh.nabla;
-
-        dh        = forward_propagation(batch, plate, angle(kernel), angle(d1), angle(d2), Nx, Ny, nx, ny, r1, r2, k, size_d2_ix, size_d2_iy, ratio_ix, ratio_iy, a0);
-        dh        = backward_propagation(dh, angle(rd1), angle(rd2), a0, P);
-        nabla_ang = nabla_ang + dh.nabla;
+        batch     = batches(j);
+        dh        = forward_propagation(batch, plate, kernel, d1, d2, Nx, Ny, nx, ny, r1, r2, k, size_d2_ix, size_d2_iy, ratio_ix, ratio_iy, a0);
+        dh        = backward_propagation(dh, rd1, rd2, a0, P);
+        nabla = nabla + dh.nabla;
     end
 
     disp("Starting updating kernel...");
@@ -138,13 +134,8 @@ for i=1:1:epoch
     % start backpropagation for each epoch,
     % after back propagation, update the kernel mask
 
-    nabla_abs  = nabla_abs * (eta/images_per_epoch);
-    nabla_ang  = nabla_ang * (eta/images_per_epoch);
-    % b_nabla  = abs(nabla) * (eta/images_per_epoch);
-
-    a_kernel = abs(kernel)   - nabla_abs;
-    b_kernel = angle(kernel) - nabla_ang;
-    kernel   = abs(a_kernel) .* exp(1i * b_kernel);
+    nabla  = nabla * (eta/images_per_epoch);
+    kernel = kernel - nabla;
 
     % at every 5 epochs, run tests
     if (mod(i, 5) == 0)
