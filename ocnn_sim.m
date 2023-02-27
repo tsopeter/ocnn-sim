@@ -9,8 +9,8 @@
 
 % define the parameters of the network
 
-        Nx = 512;      % number of columns
-        Ny = 512;      % number of rows
+        Nx = 256;      % number of columns
+        Ny = 256;      % number of rows
         
         % this defines the size of the display
         nx = 80e-3;
@@ -64,7 +64,7 @@ disp("Generating random kernel...");
 % we want to initalize the kernel mask with random phase and amplitude
 % if the kernel exists, uncomment the following
 % kernel = load('data/kernel.mat').kernel;
-if (load_KERNEL_flag == 1)
+if (load_KERNEL_flag == 0)
     kernel = mask_resize(internal_random_amp(round(ix), round(iy)), Nx, Ny);
 else
     disp("Grabbing pre-computed kernel...");
