@@ -9,8 +9,8 @@
 
 % define the parameters of the network
 
-        Nx = 256;      % number of columns
-        Ny = 256;      % number of rows
+        Nx = 512;      % number of columns
+        Ny = 512;      % number of rows
         
         % this defines the size of the display
         nx = 80e-3;
@@ -41,11 +41,16 @@
 
         P = 0.5;
 
+        read_MNIST_flag  = 0;     % zero the flag is already read!!
+        load_KERNEL_flag = 0;     % zero the flag if kernel needs to be generated
+
 disp("Getting data...");
 
 % load the mnist data into a MxM matrix format
-data  = read_MNIST('training/images', 'training/labels');
-test  = read_MNIST('testing/images', 'testing/labels');
+if (read_MNIST_flag == 1)
+    data  = read_MNIST('training/images', 'training/labels');
+    test  = read_MNIST('testing/images', 'testing/labels');
+end
 
 % get the interpolation value k
 kx = log2(double(ix - data.n_cols)/double(data.n_cols - 1))+1;
@@ -59,7 +64,12 @@ disp("Generating random kernel...");
 % we want to initalize the kernel mask with random phase and amplitude
 % if the kernel exists, uncomment the following
 % kernel = load('data/kernel.mat').kernel;
-kernel = mask_resize(internal_random_amp(round(ix), round(iy)), Nx, Ny);
+if (load_KERNEL_flag == 1)
+    kernel = mask_resize(internal_random_amp(round(ix), round(iy)), Nx, Ny);
+else
+    disp("Grabbing pre-computed kernel...");
+    kernel = load('data\kernel.mat');
+end
 
 disp("Generating test bach...");
 % create a batch to operate testing on
@@ -93,8 +103,12 @@ disp("Creating detector plate...");
 r1 = ratio_ix / 4;
 r2 = ratio_iy / 25;
 
+% create the detector plate,
+% the detector plate is used for detecting digits
 plate = detector_plate(size_d2_ix, size_d2_ix, ratio_ix, ratio_iy, r1, r2);
 
+% take the hermitian of the convolution kernels
+% used for backpropagation
 rd1  = d1';
 rd2  = d2';
 
