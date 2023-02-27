@@ -37,7 +37,7 @@
 
         testing_ratio = 0.1;     % 10% of testing data (10k images)
 
-        M_par_exec = 8;          % Number of cores for parallel execution
+        M_par_exec = 2;          % Number of cores for parallel execution
 
         P = 0.5;
 
@@ -95,8 +95,8 @@ r2 = ratio_iy / 25;
 
 plate = detector_plate(size_d2_ix, size_d2_ix, ratio_ix, ratio_iy, r1, r2);
 
-rd1  = rot90(d1, 2);
-rd2  = rot90(d2, 2);
+rd1  = d1';
+rd2  = d2';
 
 disp("Running first test...");
 
