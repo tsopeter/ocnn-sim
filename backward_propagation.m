@@ -7,10 +7,10 @@ function zh = backward_propagation(dh, Nx, Ny, nx, ny, r1, r2, rd1, rd2, a0, P)
     %
     %
     % continue pass of forward propagation
-    W = size(i2);
+    W = size(D);
     results   = gpuArray(zeros(W(1), W(2), 10, 'single'));
-    results1D = gpuArray(zeros(10, 'single'));
-    expected  = gpuArray(zeros(10, 'single'));
+    results1D = gpuArray(zeros(10, 1, 'single'));
+    expected  = gpuArray(zeros(10, 1, 'single'));
     expected(dh.given_label+1)=1;
 
     for i=1:10
@@ -70,7 +70,7 @@ function zh = backward_propagation(dh, Nx, Ny, nx, ny, r1, r2, rd1, rd2, a0, P)
     dDmask = gpuArray(zeros(size(D), 'single'));
     for i=1:10
         Pi = imrotate(circle_at(Nx, Ny, nx, ny, r1, 0, r2), 36*(i-1), 'crop');
-        dDmask = dDmask + dDsfmax(i) * Pi;
+        dDmask = dDmask + dDdsfmax(i) * Pi;
     end
 
     % dD_di3 = afm(180(d2), dD)

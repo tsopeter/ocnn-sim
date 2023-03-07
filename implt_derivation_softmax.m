@@ -3,7 +3,7 @@ function dLdX = implt_derivation_softmax(dLdZ, X, Z)
     %
     %
     % Create the Jacobian, which is an N by N matrix
-    J = gpuArray(zeros(W(1), W(1), 'zeros'));
+    J = gpuArray(zeros(W(1), W(1), 'single'));
 
     for i=W(1)
         for j=W(1)
@@ -35,7 +35,7 @@ function dLdX = implt_derivation_softmax(dLdZ, X, Z)
     dLdX = gpuArray(zeros(W, 'single'));
 
     for i=W(1)
-        dLdX(i) = dLdZ .* J(:, i);
+        dLdX(i) = dLdZ.' * J(:, i);
     end
 
 end
