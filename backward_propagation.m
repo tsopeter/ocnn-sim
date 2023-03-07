@@ -1,8 +1,30 @@
-function zh = backward_propagation(dh, rd1, rd2, a0, P)
+function zh = backward_propagation(dh, Nx, Ny, nx, ny, r1, r2, rd1, rd2, a0, P)
     i0 = dh.input_img;
     i2 = dh.distance_1_img;
     D  = dh.distance_2_img;
-    S  = dh.soln_img .* sqrt(P);
+    
+    %
+    %
+    %
+    % continue pass of forward propagation
+    W = size(i2);
+    results   = gpuArray(zeros(W(1), W(2), 10, 'single'));
+    results1D = gpuArray(zeros(10, 'single'));
+    expected  = gpuArray(zeros(10, 'single'));
+    expected(dh.given_label+1)=1;
+
+    for i=1:10
+        plate = imrotate(circle_at(Nx, Ny, nx, ny, r1, 0, r2), 36*(i-1), 'crop');
+        results(:,:,i)=D .* plate;
+        results1D(i) = sum(sum(results(:,:,i)));
+    end
+
+    %
+    %
+    %
+    % pass through softmax layer
+    %
+    sfmax = softmax(results1D);
 
     % remember
     % i0 <- input
@@ -16,10 +38,43 @@ function zh = backward_propagation(dh, rd1, rd2, a0, P)
 
     % we need to take the derivative
     % with respect to input i3
-    dD      = abs(D) - S;    % from the quadratic cost function
+    dD      = abs(sfmax) - expected;    % from the quadratic cost function
+    
+    %
+    %
+    % backward propagate through softmax layer
+    dDdsfmax = implt_derivation_softmax(dD, results1D, sfmax);
+
+    %
+    %
+    %
+    % now, backward propagate, flatten layer
+    %
+    % Remember that, Zi = sum(sum(X .* Pi));
+    % where i denotes a label
+    %
+    %
+    % dDdsfmax = [dLDZ0, dLdZ1, ..., dLdZN]
+    %
+    %
+    % then, dLdX = dLdZ0 * dZ0dX + dLdZ1 * dZ1dX ... + dLdZN * dZNdX
+    %
+    %
+    % What is dZidX ??
+    %
+    % Zi = sum(sum(X .* Pi));
+    %
+    % dZidX = Pi
+    %
+
+    dDmask = gpuArray(zeros(size(D), 'single'));
+    for i=1:10
+        Pi = imrotate(circle_at(Nx, Ny, nx, ny, r1, 0, r2), 36*(i-1), 'crop');
+        dDmask = dDmask + dDsfmax(i) * Pi;
+    end
 
     % dD_di3 = afm(180(d2), dD)
-    dD_di3  = conv2(rd2, dD, 'full');
+    dD_di3  = conv2(rd2, dDmask, 'full');
 
     % take derivative of i3 with respect to i2
     dD_di2 = dD_di3 .* conj(nonlinear_backward(i2, a0));

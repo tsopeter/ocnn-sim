@@ -41,8 +41,8 @@
 
         P = 0.5;
 
-        read_MNIST_flag  = 0;     % zero the flag is already read!!
-        load_KERNEL_flag = 1;     % zero the flag if kernel needs to be generated
+        read_MNIST_flag  = 1;     % zero the flag is already read!!
+        load_KERNEL_flag = 0;     % zero the flag if kernel needs to be generated
 
 disp("Getting data...");
 
@@ -139,7 +139,7 @@ for i=1:1:epoch
         % the bottom below represents the forward pass
         batch     = batches(j);
         dh        = forward_propagation(batch, plate, kernel, d1, d2, Nx, Ny, nx, ny, r1, r2, k, size_d2_ix, size_d2_iy, ratio_ix, ratio_iy, a0);
-        dh        = backward_propagation(dh, rd1, rd2, a0, P);
+        dh        = backward_propagation(dh, size_d2_ix, size_d2_iy, ratio_ix, ratio_iy, r1, r2, rd1, rd2, a0, P);
         nabla = nabla + dh.nabla;
     end
 
