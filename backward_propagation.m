@@ -67,25 +67,25 @@ function zh = backward_propagation(dh, Nx, Ny, nx, ny, r1, r2, rd1, rd2, a0, P)
     % dZidX = Pi
     %
 
-    dDmask = gpuArray(zeros(size(D), 'single'));
+    size_D = size(D);
+    dDmask = gpuArray(zeros(size_D(1), size_D(2), 10, 'single'));
     for i=1:10
         Pi = imrotate(circle_at(Nx, Ny, nx, ny, r1, 0, r2), 36*(i-1), 'crop');
-        dDmask = dDmask + dDdsfmax(i) * Pi;
+        dDmask(:, :, i) = dDdsfmax(i) * Pi;
     end
 
     % dD_di3 = afm(180(d2), dD)
-    dD_di3  = conv2(rd2, dDmask, 'full');
 
-    % take derivative of i3 with respect to i2
-    dD_di2 = dD_di3 .* conj(nonlinear_backward(i2, a0));
-
-    % take derivative of i2 with respect to i1
-    dD_di1 = conv2(rd1, dD_di2, 'full');
-
-    % take derivative of i1 with respect to dk
-    dD_dk  = i0 .* dD_di1;
+    function Z = backprop_internal(dDf)
+        dD_di3 = conv2(rd2, dDf, 'full');
+        dD_di2 = dD_di3 .* conj(nonlinear_backward(i2, a0));
+        dD_di1 = conv2(rd1, dD_di2, 'full');
+        Z = i0 .* dD_di1;
+    end
 
     zh = data_handler;
-    zh.nabla = dD_dk;
-
+    zh.nabla = backprop_internal(dDmask(:,:,1))./10;
+    for i=2:10
+        zh.nabla = zh.nabla + (backprop_internal(dDmask(:,:,i))./10);
+    end
 end

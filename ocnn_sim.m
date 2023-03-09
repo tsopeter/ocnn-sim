@@ -41,7 +41,7 @@
 
         P = 0.5;
 
-        read_MNIST_flag  = 0;     % zero the flag is already read!!
+        read_MNIST_flag  = 1;     % zero the flag is already read!!
         load_KERNEL_flag = 0;     % zero the flag if kernel needs to be generated
 
 disp("Getting data...");
