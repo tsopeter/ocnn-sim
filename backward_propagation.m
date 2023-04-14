@@ -15,7 +15,7 @@ function zh = backward_propagation(dh, Nx, Ny, nx, ny, r1, r2, rd1, rd2, a0, P)
 
     for i=1:10
         plate = imrotate(circle_at(Nx, Ny, nx, ny, r1, 0, r2), 36*(i-1), 'crop');
-        results(:,:,i)=D .* plate;
+        results(:,:,i)=abs(D) .* plate;
         results1D(i) = sum(sum(results(:,:,i)));
     end
 
@@ -68,10 +68,10 @@ function zh = backward_propagation(dh, Nx, Ny, nx, ny, r1, r2, rd1, rd2, a0, P)
     %
 
     size_D = size(D);
-    dDmask = gpuArray(zeros(size_D(1), size_D(2), 10, 'single'));
+    dDmask = gpuArray(zeros(size_D, 'single'));
     for i=1:10
-        Pi = imrotate(circle_at(Nx, Ny, nx, ny, r1, 0, r2), 36*(i-1), 'crop');
-        dDmask(:, :, i) = dDdsfmax(i) * Pi;
+        Pmi = imrotate(circle_at(Nx, Ny, nx, ny, r1, 0, r2), 36*(i-1), 'crop');
+        dDmask = dDmask + dDdsfmax(i) * Pmi;
     end
 
     % dD_di3 = afm(180(d2), dD)
@@ -84,8 +84,5 @@ function zh = backward_propagation(dh, Nx, Ny, nx, ny, r1, r2, rd1, rd2, a0, P)
     end
 
     zh = data_handler;
-    zh.nabla = backprop_internal(dDmask(:,:,1))./10;
-    for i=2:10
-        zh.nabla = zh.nabla + (backprop_internal(dDmask(:,:,i))./10);
-    end
+    zh.nabla = backprop_internal(dDmask);
 end

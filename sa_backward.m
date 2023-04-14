@@ -3,12 +3,7 @@ function z = sa_backward(E)
     g = abs(E);
     p = angle(E);
 
-    if (g < 0.0001)
-        m = 0.0001;
-        z = m * exp(1i * p);
-    else
-        q = abs(sa_forward(E))/g;
-        m = q * exp(1+(a0*g*g)/(1+g^2)^2);
-        z = m * exp(1i * p);
-    end
+    m = exp(-a0/2/(1+g^2));
+    q = m * (1+(a0*g*g)/(1+g^2)^2);
+    z = q * exp(1i * p);
 end

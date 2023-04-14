@@ -13,8 +13,8 @@
         Ny = 256;      % number of rows
         
         % this defines the size of the display
-        nx = 80e-3;
-        ny = 80e-3;
+        nx = 20e-3;
+        ny = 20e-3;
         
         % interpolation value
 
@@ -28,20 +28,20 @@
         wavelength = 1000e-9;    % wavelength
         
         epoch = 200;              % we want 100 epochs
-        images_per_epoch = 256;   % we want 16 images per training session (epoch)
+        images_per_epoch = 128;   % we want 16 images per training session (epoch)
         
-        distance_1 = 15e-2;      % propagation distance
-        distance_2 = 15e-2;
+        distance_1 = 25e-2;      % propagation distance
+        distance_2 = 25e-2;
         
-        eta = 3.0;              % learning rate
+        eta = 5.0;              % learning rate
 
         testing_ratio = 0.1;     % 10% of testing data (10k images)
 
         M_par_exec = 2;          % Number of cores for parallel execution
 
-        P = 0.5;
+        P = 5;
 
-        read_MNIST_flag  = 1;     % zero the flag is already read!!
+        read_MNIST_flag  = 0;     % zero the flag is already read!!
         load_KERNEL_flag = 0;     % zero the flag if kernel needs to be generated
 
 disp("Getting data...");
@@ -65,7 +65,7 @@ disp("Generating random kernel...");
 % if the kernel exists, uncomment the following
 % kernel = load('data/kernel.mat').kernel;
 if (load_KERNEL_flag == 0)
-    kernel = mask_resize(internal_random_amp(round(ix), round(iy)), Nx, Ny);
+    kernel = mask_resize(internal_random_amp(round(ix), round(iy)), Nx, Ny) * P;
 else
     disp("Grabbing pre-computed kernel...");
     kernel_fd = load('data\kernel.mat');
